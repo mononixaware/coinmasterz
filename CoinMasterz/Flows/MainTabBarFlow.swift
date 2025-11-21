@@ -14,32 +14,34 @@ protocol MainTabBarFlow: TabBarFlow {
 
 final class DefaultMainTabBarFlow: TabBarFlow, MainTabBarFlow, FlowFactory {
     
+    private let tabs: [MainTab] = [.assets, .watchlist]
+    
     override func start() {
-        setupTabs()
+        showMainView()
     }
 }
 
 private extension DefaultMainTabBarFlow {
     
-    func setupTabs() {
-        let assetsNavigationController = UINavigationController()
-        assetsNavigationController.title = "AssetsNavigationController"
-        assetsNavigationController.tabBarItem = UITabBarItem(
-            title: "Assets",
-            image: UIImage(systemName: "house"),
-            selectedImage: UIImage(systemName: "house.fill")
-        )
-        let assetsFlow = makeAssetsFlow(navigationController: assetsNavigationController)
-        
-        let watchlistNavigationController = UINavigationController()
-        watchlistNavigationController.title = "WatchlistNavigationController"
-        watchlistNavigationController.tabBarItem = UITabBarItem(
-            title: "Watchlist",
-            image: UIImage(systemName: "star"),
-            selectedImage: UIImage(systemName: "star.fill")
-        )
-        let watchlistFlow = makeWatchlistFlow(navigationController: watchlistNavigationController)
-        
-        setTabFlows([assetsFlow, watchlistFlow])
+    func showMainView() {
+        show(tabs.map(makeSubflow))
+    }
+}
+
+private extension DefaultMainTabBarFlow {
+    
+    func makeSubflow(_ tab: MainTab) -> Flow {
+        switch tab {
+        case .assets:
+            let assetsNavigationController = UINavigationController()
+            assetsNavigationController.title = "AssetsNavigationController"
+            assetsNavigationController.tabBarItem = MainTab.assets.tabBarItem
+            return makeAssetsFlow(navigationController: assetsNavigationController)
+        case .watchlist:
+            let watchlistNavigationController = UINavigationController()
+            watchlistNavigationController.title = "WatchlistNavigationController"
+            watchlistNavigationController.tabBarItem = MainTab.watchlist.tabBarItem
+            return makeWatchlistFlow(navigationController: watchlistNavigationController)
+        }
     }
 }

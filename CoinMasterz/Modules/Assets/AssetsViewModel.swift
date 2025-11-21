@@ -6,15 +6,34 @@
 //
 
 import Combine
+import RxSwift
 
 final class AssetsViewModel: ObservableObject {
     
     @Published private(set) var model: AssetsModel
     
     private weak var output: AssetsViewOutput?
+    private let coinCapProvider: CoinCapProvider
+    private var disposeBag = DisposeBag()
     
-    init(model: AssetsModel) {
+    init(coinCapProvider: CoinCapProvider,
+         model: AssetsModel) {
+        self.coinCapProvider = coinCapProvider
         self.model = model
+        
+        getAssets()
+    }
+}
+
+private extension AssetsViewModel {
+    
+    func getAssets() {
+        coinCapProvider.getAssets()
+            .map(AssetsModel.builder.makeEntities)
+            .subscribe(on: MainScheduler.instance)
+            .weak(self) { $0.model.accept(entities: $1) }
+            .traceError()
+            .disposed(by: disposeBag)
     }
 }
 

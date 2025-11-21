@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>COINCAP_BASE_URL</key>
+	<string>$(COINCAP_BASE_URL)</string>
+	<key>COINCAP_BEARER_TOKEN</key>
+	<string>$(COINCAP_BEARER_TOKEN)</string>
+	<key>COINCAP_AUTHORIZATION_BEARER_KEY</key>
+	<string>$(COINCAP_AUTHORIZATION_BEARER_KEY)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

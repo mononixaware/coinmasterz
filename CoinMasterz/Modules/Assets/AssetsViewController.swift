@@ -19,9 +19,35 @@ final class AssetsViewController: BaseHostingController<AssetsViewUI>, AssetsVie
 
 struct AssetsViewUI: View {
     
-    @ObservedObject private(set) var viewModel: AssetsViewModel
+    @ObservedObject private var viewModel: AssetsViewModel
+    
+    init(viewModel: AssetsViewModel) {
+        self.viewModel = viewModel
+    }
     
     var body: some View {
-        Text("Assets View")
+        ScrollView(.vertical) {
+            LazyVStack(spacing: 12.0) {
+                ForEach(viewModel.model.entities) { entity in
+                    HStack {
+                        Text(entity.id)
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(4)
+                            .background(.tertiary)
+                            .clipShape(.capsule)
+                        
+                        Text(entity.name)
+                            .font(.body.bold())
+                            .foregroundStyle(.primary)
+                        
+                        Spacer()
+                    }
+                    
+                    Divider()
+                }
+            }
+            .padding(16)
+        }
     }
 }

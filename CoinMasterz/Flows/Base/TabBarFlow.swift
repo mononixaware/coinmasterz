@@ -36,10 +36,8 @@ class TabBarFlow: Flow {
     
     // MARK: -
     
-    func setTabFlows(_ flows: [NavigationFlow]) {
-        flows.forEach { addChild($0) }
-        
-        let viewControllers = flows.map { $0.toPresent() }
-        tabBarController.setViewControllers(viewControllers, animated: false)
+    func show(_ presentables: [Presentable]) {
+        presentables.compactMap(Flow.self).forEach { addChild($0) }
+        tabBarController.viewControllers = presentables.map { $0.toPresent() }
     }
 }

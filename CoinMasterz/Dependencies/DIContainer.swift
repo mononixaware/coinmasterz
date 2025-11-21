@@ -18,7 +18,8 @@ final class DIContainer {
         container = Container()
         asssembler = Assembler([
             FlowAssembly(),
-            ModuleAssembly()
+            ModuleAssembly(),
+            ServiceAssembly()
         ], container: container)
     }
 }

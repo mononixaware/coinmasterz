@@ -1,0 +1,7 @@
+// Copy this file to Config.xcconfig and replace the placeholder values
+// Add Config.xcconfig to .gitignore so actual credentials aren't committed
+
+// CoinCap API Configuration
+COINCAP_BASE_URL = YOUR_COINCAP_BASE_URL_HERE
+COINCAP_AUTHORIZATION_BEARER_KEY = YOUR_COINCAP_AUTHORIZATION_BEARER_KEY_HERE
+COINCAP_BEARER_TOKEN = YOUR_COINCAP_BEARER_TOKEN_HERE

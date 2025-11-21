@@ -11,7 +11,10 @@ final class ModuleAssembly: Assembly {
     
     func assemble(container: Container) {
         container.register(AssetsView.self) { r, model in
-            let viewModel = AssetsViewModel(model: model)
+            let viewModel = AssetsViewModel(
+                coinCapProvider: r.resolve(),
+                model: model
+            )
             let viewUI = AssetsViewUI(viewModel: viewModel)
             let view = AssetsViewController(rootView: viewUI)
             viewModel.bind(output: view)
