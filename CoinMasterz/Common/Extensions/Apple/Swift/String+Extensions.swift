@@ -29,4 +29,10 @@ public extension String {
     var urlValue: URL? {
         isEmpty ? nil : URL(string: self)
     }
+    
+    var initials: String {
+        let words = self.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+        let initials = words.map { $0.prefix(1).uppercased() }
+        return initials.joined()
+    }
 }

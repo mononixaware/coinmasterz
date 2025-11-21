@@ -27,24 +27,12 @@ struct AssetsViewUI: View {
     
     var body: some View {
         ScrollView(.vertical) {
-            LazyVStack(spacing: 12.0) {
-                ForEach(viewModel.model.entities) { entity in
-                    HStack {
-                        Text(entity.id)
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .padding(4)
-                            .background(.tertiary)
-                            .clipShape(.capsule)
-                        
-                        Text(entity.name)
-                            .font(.body.bold())
-                            .foregroundStyle(.primary)
-                        
-                        Spacer()
-                    }
+            LazyVStack(spacing: 16.0) {
+                ForEach(viewModel.model.displayEntities) { entity in
+                    AssetsViewComponents.Entity(entity: entity)
                     
                     Divider()
+                        .padding(.leading, 60)
                 }
             }
             .padding(16)
