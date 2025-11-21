@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2A01B8502ED05B9900FFAA16 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 2A01B84F2ED05B9900FFAA16 /* Moya */; };
-		2A01B8522ED05B9900FFAA16 /* RxMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 2A01B8512ED05B9900FFAA16 /* RxMoya */; };
-		2A01B8552ED05BE700FFAA16 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2A01B8542ED05BE700FFAA16 /* RxSwift */; };
+		2A01B9892ED11A1B00FFAA16 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2A01B9882ED11A1B00FFAA16 /* RxSwift */; };
+		2A01B98C2ED11A2500FFAA16 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 2A01B98B2ED11A2500FFAA16 /* Moya */; };
+		2A01B98E2ED11A2500FFAA16 /* RxMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 2A01B98D2ED11A2500FFAA16 /* RxMoya */; };
 		2A5013B12ECFDC0F008DF818 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 2A5013B02ECFDC0F008DF818 /* Swinject */; };
 		2AFBDB772ED027360024F5CB /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 2AFBDB762ED027360024F5CB /* Config.xcconfig */; };
 		2AFBDB8D2ED0323F0024F5CB /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 2AFBDB8C2ED0323F0024F5CB /* Alamofire */; };
@@ -75,11 +75,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A01B98E2ED11A2500FFAA16 /* RxMoya in Frameworks */,
+				2A01B9892ED11A1B00FFAA16 /* RxSwift in Frameworks */,
 				2AFBDB8D2ED0323F0024F5CB /* Alamofire in Frameworks */,
+				2A01B98C2ED11A2500FFAA16 /* Moya in Frameworks */,
 				2A5013B12ECFDC0F008DF818 /* Swinject in Frameworks */,
-				2A01B8552ED05BE700FFAA16 /* RxSwift in Frameworks */,
-				2A01B8522ED05B9900FFAA16 /* RxMoya in Frameworks */,
-				2A01B8502ED05B9900FFAA16 /* Moya in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,9 +143,9 @@
 			packageProductDependencies = (
 				2A5013B02ECFDC0F008DF818 /* Swinject */,
 				2AFBDB8C2ED0323F0024F5CB /* Alamofire */,
-				2A01B84F2ED05B9900FFAA16 /* Moya */,
-				2A01B8512ED05B9900FFAA16 /* RxMoya */,
-				2A01B8542ED05BE700FFAA16 /* RxSwift */,
+				2A01B9882ED11A1B00FFAA16 /* RxSwift */,
+				2A01B98B2ED11A2500FFAA16 /* Moya */,
+				2A01B98D2ED11A2500FFAA16 /* RxMoya */,
 			);
 			productName = CoinMasterz;
 			productReference = 2AECD47E2ECFC29800093EFC /* CoinMasterz.app */;
@@ -232,8 +232,8 @@
 			packageReferences = (
 				2A5013AF2ECFDC0F008DF818 /* XCRemoteSwiftPackageReference "Swinject" */,
 				2AFBDB8B2ED0323F0024F5CB /* XCRemoteSwiftPackageReference "Alamofire" */,
-				2A01B84E2ED05B9900FFAA16 /* XCRemoteSwiftPackageReference "Moya" */,
-				2A01B8532ED05BE700FFAA16 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				2A01B9872ED11A1B00FFAA16 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				2A01B98A2ED11A2500FFAA16 /* XCRemoteSwiftPackageReference "Moya" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2AECD47F2ECFC29800093EFC /* Products */;
@@ -653,20 +653,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		2A01B84E2ED05B9900FFAA16 /* XCRemoteSwiftPackageReference "Moya" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Moya/Moya.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 15.0.3;
-			};
-		};
-		2A01B8532ED05BE700FFAA16 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+		2A01B9872ED11A1B00FFAA16 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ReactiveX/RxSwift";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 6.9.1;
+			};
+		};
+		2A01B98A2ED11A2500FFAA16 /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
 			};
 		};
 		2A5013AF2ECFDC0F008DF818 /* XCRemoteSwiftPackageReference "Swinject" */ = {
@@ -688,20 +688,20 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		2A01B84F2ED05B9900FFAA16 /* Moya */ = {
+		2A01B9882ED11A1B00FFAA16 /* RxSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 2A01B84E2ED05B9900FFAA16 /* XCRemoteSwiftPackageReference "Moya" */;
+			package = 2A01B9872ED11A1B00FFAA16 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxSwift;
+		};
+		2A01B98B2ED11A2500FFAA16 /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A01B98A2ED11A2500FFAA16 /* XCRemoteSwiftPackageReference "Moya" */;
 			productName = Moya;
 		};
-		2A01B8512ED05B9900FFAA16 /* RxMoya */ = {
+		2A01B98D2ED11A2500FFAA16 /* RxMoya */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 2A01B84E2ED05B9900FFAA16 /* XCRemoteSwiftPackageReference "Moya" */;
+			package = 2A01B98A2ED11A2500FFAA16 /* XCRemoteSwiftPackageReference "Moya" */;
 			productName = RxMoya;
-		};
-		2A01B8542ED05BE700FFAA16 /* RxSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2A01B8532ED05BE700FFAA16 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxSwift;
 		};
 		2A5013B02ECFDC0F008DF818 /* Swinject */ = {
 			isa = XCSwiftPackageProductDependency;

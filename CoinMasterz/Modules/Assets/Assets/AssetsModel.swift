@@ -10,17 +10,28 @@ import SwiftUI
 struct AssetsModel {
     
     private(set) var contenxt: Context
+    private(set) var sortKind: SortKind
     private var entities: [Entity]
     
     init(contenxt: Context = .loading,
+         sortKind: SortKind = .default,
          entities: [Entity] = []) {
         self.contenxt = contenxt
+        self.sortKind = sortKind
         self.entities = entities
     }
     
     enum Context {
         
         case loading, loaded, empty
+    }
+    
+    enum SortKind {
+        
+        case `default`
+        case marketCapDescending, marketCapAscending
+        case priceDescending, priceAscending
+        case changePercentDescending, changePercentAscending
     }
     
     struct Entity: Identifiable {
@@ -43,12 +54,22 @@ struct AssetsModel {
     }
 }
 
+// MARK: Extensions
+
 extension AssetsModel {
     
     static let builder = AssetsModelBuilder.self
     
     var displayEntities: [Entity] {
-        entities
+        switch sortKind {
+        case .default: entities
+        case .marketCapDescending: entities.sorted(by: \.marketCap, >)
+        case .marketCapAscending: entities.sorted(by: \.marketCap, <)
+        case .priceDescending: entities.sorted(by: \.price, >)
+        case .priceAscending: entities.sorted(by: \.price, <)
+        case .changePercentDescending: entities.sorted(by: \.changePercentDynamics.value, >)
+        case .changePercentAscending: entities.sorted(by: \.changePercentDynamics.value, <)
+        }
     }
 }
 
@@ -56,6 +77,10 @@ extension AssetsModel {
     
     mutating func changeContext(to state: Context) {
         self.contenxt = state
+    }
+    
+    mutating func changeSortKind(to kind: SortKind) {
+        self.sortKind = kind
     }
     
     mutating func accept(entities: [Entity]) {

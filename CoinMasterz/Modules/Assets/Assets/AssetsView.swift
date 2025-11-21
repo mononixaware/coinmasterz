@@ -5,16 +5,23 @@
 //  Created by Dumitru Paraschiv on 21.11.2025.
 //
 
-import UIKit
-import SwiftUI
+import Combine
+
+enum AssetsViewSteps {
+    
+    case sortSelected(selected: AssetsModel.SortKind, selectCompletion: Callback<AssetsModel.SortKind>?)
+}
 
 protocol AssetsViewOutput: AnyObject {
     
+    var steps: PassthroughSubject<AssetsViewSteps, Never> { get }
 }
 
 protocol AssetsViewInput {
     
     func bind(output: AssetsViewOutput)
+    
+    func selectSort()
 }
 
 protocol AssetsView: Presentable, AssetsViewOutput {

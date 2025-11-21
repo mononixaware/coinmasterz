@@ -5,15 +5,35 @@
 //  Created by Dumitru Paraschiv on 21.11.2025.
 //
 
+import Combine
 import SwiftUI
 
 final class AssetsViewController: BaseHostingController<AssetsViewUI>, AssetsView {
     
+    var steps = PassthroughSubject<AssetsViewSteps, Never>()
     var viewModel: AssetsViewInput!
     
     override func setupNavigation() {
         super.setupNavigation()
         navigationItem.title = "Assets"
+        setupNavigationBarButtons()
+    }
+}
+
+private extension AssetsViewController {
+    
+    func setupNavigationBarButtons() {
+        let sortButton = UIBarButtonItem(
+            image: UIImage(systemName: "arrow.up.arrow.down"),
+            style: .plain,
+            target: self,
+            action: #selector(sortButtonTapped)
+        )
+        navigationItem.rightBarButtonItem = sortButton
+    }
+    
+    @objc func sortButtonTapped() {
+        viewModel.selectSort()
     }
 }
 

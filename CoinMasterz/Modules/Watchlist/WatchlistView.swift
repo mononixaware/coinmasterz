@@ -5,9 +5,6 @@
 //  Created by Dumitru Paraschiv on 21.11.2025.
 //
 
-import UIKit
-import SwiftUI
-
 protocol WatchlistViewOutput: AnyObject {
     
 }

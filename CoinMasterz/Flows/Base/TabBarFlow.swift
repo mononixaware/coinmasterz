@@ -24,6 +24,10 @@ class TabBarFlow: Flow {
     
     // MARK: Presentable
     
+    var presentationDelegate: PresentationControllerDelegate {
+        tabBarController.presentationDelegate
+    }
+    
     func toPresent() -> UIViewController {
         tabBarController
     }
@@ -31,7 +35,7 @@ class TabBarFlow: Flow {
     // MARK: Flow
     
     func start() {
-        preconditionFailure("Subclass must implement start()")
+        
     }
     
     // MARK: -

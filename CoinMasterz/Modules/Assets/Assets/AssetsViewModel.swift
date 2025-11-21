@@ -42,4 +42,10 @@ extension AssetsViewModel: AssetsViewInput {
     func bind(output: any AssetsViewOutput) {
         self.output = output
     }
+    
+    func selectSort() {
+        output?.steps.send(.sortSelected(selected: model.sortKind, selectCompletion: { [weak self] sortKind in
+            self?.model.changeSortKind(to: sortKind)
+        }))
+    }
 }
