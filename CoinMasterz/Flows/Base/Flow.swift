@@ -12,6 +12,8 @@ protocol Flow: AnyObject, Presentable {
     
     var childFlows: [Flow] { get set }
     var parentFlow: Flow? { get set }
+    var firstViewController: UIViewController? { get }
+    var lastViewController: UIViewController? { get }
     
     func start()
     func addChild(_ flow: Flow)
@@ -20,7 +22,6 @@ protocol Flow: AnyObject, Presentable {
     func finish()
 }
 
-@MainActor
 class BaseFlow<Controller: UIViewController>: Flow, AnyFactory {
     
     var childFlows = [Flow]()
@@ -41,6 +42,14 @@ class BaseFlow<Controller: UIViewController>: Flow, AnyFactory {
     }
     
     // MARK: Flow
+    
+    var firstViewController: UIViewController? {
+        nil
+    }
+    
+    var lastViewController: UIViewController? {
+        nil
+    }
     
     func start() {
         // Default implementation does nothing

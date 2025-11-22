@@ -16,3 +16,21 @@ public extension Sequence {
         sorted { comparator(keyPath($0), keyPath($1)) }
     }
 }
+
+public extension Sequence where Element: Equatable {
+    
+    @inline(__always)
+    func intersects<C: Collection>(with other: C) -> Bool where C.Element == Element {
+        contains(where: other.contains)
+    }
+    
+    @inline(__always)
+    func notContains(_ element: Element) -> Bool {
+        !contains(element)
+    }
+    
+    @inline(__always)
+    func unique() -> [Element] {
+        reduce([]) { $0.contains($1) ? $0 : $0 + [$1] }
+    }
+}
