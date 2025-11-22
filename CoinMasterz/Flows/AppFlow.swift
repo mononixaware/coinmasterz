@@ -17,9 +17,9 @@ final class DefaultAppFlow: NavigationFlow, AppFlow, FlowFactory {
     
     private let window: UIWindow
     
-    init(r: Resolver, window: UIWindow, navigationController: UINavigationController) {
+    init(r: Resolver, window: UIWindow, controller: UINavigationController) {
         self.window = window
-        super.init(r: r, navigationController: navigationController)
+        super.init(r: r, controller: controller)
     }
     
     override func start() {

@@ -20,8 +20,6 @@ final class AssetsViewModel: ObservableObject {
          model: AssetsModel) {
         self.coinCapProvider = coinCapProvider
         self.model = model
-        
-        getAssets()
     }
 }
 
@@ -41,6 +39,10 @@ extension AssetsViewModel: AssetsViewInput {
     
     func bind(output: any AssetsViewOutput) {
         self.output = output
+    }
+    
+    func loadContets() {
+        getAssets()
     }
     
     func selectSort() {

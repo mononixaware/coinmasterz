@@ -9,39 +9,14 @@ import Combine
 import Swinject
 import UIKit
 
-class TabBarFlow: Flow {
-    
-    var childFlows: [Flow] = []
-    weak var parentFlow: Flow?
-    let r: Resolver
-    
-    let tabBarController: UITabBarController
-    
-    init(r: Resolver, tabBarController: UITabBarController) {
-        self.r = r
-        self.tabBarController = tabBarController
-    }
-    
-    // MARK: Presentable
-    
-    var presentationDelegate: PresentationControllerDelegate {
-        tabBarController.presentationDelegate
-    }
-    
-    func toPresent() -> UIViewController {
-        tabBarController
-    }
-    
-    // MARK: Flow
-    
-    func start() {
-        
-    }
-    
-    // MARK: -
+class TabBarFlow: BaseFlow<UITabBarController> {
     
     func show(_ presentables: [Presentable]) {
-        presentables.compactMap(Flow.self).forEach { addChild($0) }
-        tabBarController.viewControllers = presentables.map { $0.toPresent() }
+        // Clean up existing children
+        removeAllChildren()
+        
+        // Add new children
+        presentables.compactMap { $0 as? Flow }.forEach { addChild($0) }
+        controller.viewControllers = presentables.map { $0.toPresent() }
     }
 }

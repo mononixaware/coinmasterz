@@ -26,7 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let appNavigationController = UINavigationController()
         appNavigationController.title = "AppNavigationController"
         appFlow = container.resolve(with: window, appNavigationController)
-        window.rootViewController = appFlow?.navigationController
+        window.rootViewController = appFlow?.controller
         window.makeKeyAndVisible()
         appFlow?.start()
     }

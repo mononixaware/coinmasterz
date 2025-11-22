@@ -15,8 +15,11 @@ protocol AssetsFlow: NavigationFlow {
 
 final class DefaultAssetsFlow: NavigationFlow, AssetsFlow, ModuleFactory {
     
+    private var assetsViewCancellable: AnyCancellable?
+    private var assetsSortViewCancellable: AnyCancellable?
+    
     override func start() {
-        navigationController.navigationBar.prefersLargeTitles = true
+        controller.navigationBar.prefersLargeTitles = true
         showAssetsView()
     }
 }
@@ -25,30 +28,26 @@ private extension DefaultAssetsFlow {
     
     func showAssetsView() {
         let view = makeAssetsView(with: AssetsModel())
-        view.steps.sink { [weak self] in
+        assetsViewCancellable = view.steps.sink { [weak self] in
             switch $0 {
             case let .sortSelected(selectedKind, selectCompletion):
                 let model = AssetsSortModel(selectedKind: selectedKind)
                 self?.showAssetsSortView(with: model, selectCompletion: selectCompletion)
             }
         }
-        .store(in: &stepsBag)
         setRoot(view)
     }
     
     func showAssetsSortView(with model: AssetsSortModel, selectCompletion: Callback<AssetsSortModel.Kind>?) {
         let view = makeAssetsSortView(with: model)
-        let flow = NavigationFlow(r: r, navigationController: UINavigationController())
-        flow.navigationController.sheetPresentationController?.prefersGrabberVisible = true
-        flow.navigationController.sheetPresentationController?.detents = [.medium(), .large()]
-        view.steps.sink { [weak self, weak flow] in
+        assetsSortViewCancellable = view.steps.sink { [weak self] in
             switch $0 {
             case let .selected(kind):
                 selectCompletion?(kind)
-                self?.dismiss(flow)
+                self?.pop(animated: true)
+                self?.assetsSortViewCancellable = nil
             }
         }
-        .store(in: &stepsBag)
-        present(view, embeddingFlow: flow)
+        push(view)
     }
 }

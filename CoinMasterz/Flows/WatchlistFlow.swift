@@ -15,7 +15,7 @@ protocol WatchlistFlow: NavigationFlow {
 final class DefaultWatchlistFlow: NavigationFlow, WatchlistFlow, ModuleFactory {
     
     override func start() {
-        navigationController.navigationBar.prefersLargeTitles = true
+        controller.navigationBar.prefersLargeTitles = true
         showWatchlistView()
     }
 }

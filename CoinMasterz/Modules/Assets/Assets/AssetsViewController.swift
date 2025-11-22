@@ -18,6 +18,11 @@ final class AssetsViewController: BaseHostingController<AssetsViewUI>, AssetsVie
         navigationItem.title = "Assets"
         setupNavigationBarButtons()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        viewModel.loadContets()
+    }
 }
 
 private extension AssetsViewController {

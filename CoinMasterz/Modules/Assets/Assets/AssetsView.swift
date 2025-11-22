@@ -20,7 +20,7 @@ protocol AssetsViewOutput: AnyObject {
 protocol AssetsViewInput {
     
     func bind(output: AssetsViewOutput)
-    
+    func loadContets()
     func selectSort()
 }
 
