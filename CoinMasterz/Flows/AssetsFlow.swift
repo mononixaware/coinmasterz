@@ -37,15 +37,20 @@ private extension DefaultAssetsFlow {
     }
     
     func showAssetsSortView(with model: AssetsSortModel, selectCompletion: Callback<AssetsSortModel.Kind>?) {
+        let controller = UINavigationController()
+        controller.title = "AssetsSortNavigationController"
+        controller.sheetPresentationController?.prefersGrabberVisible = true
+        controller.sheetPresentationController?.detents = [.medium(), .large()]
+        let flow = NavigationFlow(r: r, controller: controller)
         let view = makeAssetsSortView(with: model)
-        view.steps.sink { [weak self] in
+        view.steps.sink { [weak self, weak flow] in
             switch $0 {
             case let .selected(kind):
                 selectCompletion?(kind)
-                self?.pop(animated: true)
+                flow.flatMap { self?.dismiss($0) }
             }
         }
         .store(in: &view.stepsBag)
-        push(view, hideBottomBar: true)
+        present(view, embeddingNavigationFlow: flow)
     }
 }
