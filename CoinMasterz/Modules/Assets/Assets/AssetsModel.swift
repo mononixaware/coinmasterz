@@ -9,14 +9,17 @@ import SwiftUI
 
 struct AssetsModel {
     
-    private(set) var contenxt: Context
+    private(set) var context: Context
+    private(set) var loadMoreContext: Context
     private(set) var sortKind: SortKind
     private var entities: [Entity]
     
-    init(contenxt: Context = .loading,
+    init(context: Context = .loading,
+         loadMoreContext: Context = .loaded,
          sortKind: SortKind = .default,
          entities: [Entity] = []) {
-        self.contenxt = contenxt
+        self.context = context
+        self.loadMoreContext = loadMoreContext
         self.sortKind = sortKind
         self.entities = entities
     }
@@ -60,6 +63,8 @@ extension AssetsModel {
     
     static let builder = AssetsModelBuilder.self
     
+    static let defaultEntitiesCount = 64
+    
     var displayEntities: [Entity] {
         switch sortKind {
         case .default: entities
@@ -76,7 +81,11 @@ extension AssetsModel {
 extension AssetsModel {
     
     mutating func changeContext(to state: Context) {
-        self.contenxt = state
+        self.context = state
+    }
+    
+    mutating func changeLoadMoreContext(to state: Context) {
+        self.loadMoreContext = state
     }
     
     mutating func changeSortKind(to kind: SortKind) {
@@ -87,7 +96,18 @@ extension AssetsModel {
         self.entities = entities
         changeContext(to: entities.isEmpty ? .empty : .loaded)
     }
+    
+    mutating func append(newEntities: [Entity]) {
+        self.entities.append(contentsOf: newEntities)
+        changeLoadMoreContext(to: newEntities.count < Self.defaultEntitiesCount ? .empty : .loaded)
+    }
+    
+    mutating func reset() {
+        self = Self.init()
+    }
 }
+
+// MARK: Dynamics
 
 extension AssetsModel.Entity.Dynamics {
     

@@ -80,6 +80,28 @@ extension ApiRequest {
         return self
     }
     
+    // MARK: - Provide task
+    
+    func task(_ task: Task) -> ApiRequest {
+        self.task = task
+        return self
+    }
+    
+    func query(_ parameters: [String: Any]) -> ApiRequest {
+        task(.requestParameters(
+            parameters: parameters,
+            encoding: URLEncoding(
+                destination: .queryString,
+                arrayEncoding: .noBrackets,
+                boolEncoding: .literal
+            )
+        ))
+    }
+    
+    func query<T: Encodable>(_ encodable: T) -> ApiRequest {
+        query(encodable.jsonDictionary() ?? [:])
+    }
+    
     // MARK: - Add headers
     
     func headers(_ headers: [String: String]) -> ApiRequest {

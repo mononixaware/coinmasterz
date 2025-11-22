@@ -59,6 +59,15 @@ struct AssetsViewUI: View {
                     Divider()
                         .padding(.leading, 60)
                 }
+                
+                if viewModel.model.context == .loaded && viewModel.model.loadMoreContext == .loaded {
+                    ProgressView()
+                        .opacity(viewModel.model.loadMoreContext == .loading ? 1.0 : 0.0)
+                        .padding()
+                        .onAppear {
+                            viewModel.getMoreAssets()
+                        }
+                }
             }
             .padding(16)
         }

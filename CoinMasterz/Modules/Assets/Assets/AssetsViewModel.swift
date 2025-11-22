@@ -21,17 +21,41 @@ final class AssetsViewModel: ObservableObject {
         self.coinCapProvider = coinCapProvider
         self.model = model
     }
+    
+    func getMoreAssets() { handleGetMoreAssets() }
 }
 
 private extension AssetsViewModel {
     
-    func getAssets() {
-        coinCapProvider.getAssets()
+    func getAssets(loadMore: Bool) {
+        if loadMore {
+            model.changeLoadMoreContext(to: .loading)
+        }
+        
+        let limit = AssetsModel.defaultEntitiesCount
+        let offset = model.displayEntities.count
+        
+        coinCapProvider.getAssets(search: nil, ids: nil, limit: limit, offset: offset)
             .map(AssetsModel.builder.makeEntities)
             .subscribe(on: MainScheduler.instance)
-            .weak(self) { $0.model.accept(entities: $1) }
+            .weak(self) {
+                if loadMore {
+                    $0.model.append(newEntities: $1)
+                } else {
+                    $0.model.accept(entities: $1)
+                }
+            }
             .traceError()
             .disposed(by: disposeBag)
+    }
+}
+
+private extension AssetsViewModel {
+    
+    func handleGetMoreAssets() {
+        guard model.context == .loaded && model.loadMoreContext == .loaded else { return }
+        
+        getAssets(loadMore: true)
     }
 }
 
@@ -42,7 +66,8 @@ extension AssetsViewModel: AssetsViewInput {
     }
     
     func loadContets() {
-        getAssets()
+        model.reset()
+        getAssets(loadMore: false)
     }
     
     func selectSort() {

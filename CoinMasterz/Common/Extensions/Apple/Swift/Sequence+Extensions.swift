@@ -15,6 +15,16 @@ public extension Sequence {
                                  _ comparator: (Key, Key) -> Bool = { $0 < $1 }) -> [Element] {
         sorted { comparator(keyPath($0), keyPath($1)) }
     }
+    
+    func unique(_ comparator: (Element, Element) -> Bool) -> [Element] {
+        reduce([]) { result, element in
+            result.contains { comparator($0, element) } ? result : result + [element]
+        }
+    }
+    
+    func unique<Key: Equatable>(by keyPath: (Element) -> Key) -> [Element] {
+        unique { keyPath($0) == keyPath($1) }
+    }
 }
 
 public extension Sequence where Element: Equatable {
