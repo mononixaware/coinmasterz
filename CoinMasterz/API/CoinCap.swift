@@ -22,4 +22,11 @@ enum CoinCap {
         let vwap24Hr: String?
         let explore: String?
     }
+    
+    struct HisotryPrice: Decodable {
+        
+        let priceUsd: String
+        let time: Int
+        let date: String
+    }
 }

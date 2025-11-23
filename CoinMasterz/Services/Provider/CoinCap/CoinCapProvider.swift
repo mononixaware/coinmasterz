@@ -27,6 +27,16 @@ protocol CoinCapProvider {
     /// - Parameter slug: The unique identifier for the asset (e.g., "bitcoin", "ethereum").
     /// - Returns: A `Single` that emits a `CoinCap.Asset` object on success.
     func getAsset(slug: String) -> Single<CoinCap.Asset>
+    
+    /// Fetches historical price data for a cryptocurrency asset.
+    ///
+    /// - Parameters:
+    ///   - slug: The unique identifier for the asset (e.g., "bitcoin", "ethereum").
+    ///   - interval: Time interval for data points. Valid choices: "m1", "m5", "m15", "m30", "h1", "h2", "h6", "h12", "d1".
+    ///   - start: UNIX time in milliseconds for the start of the historical data range. Omitting will return the most recent asset history. Optional.
+    ///   - end: UNIX time in milliseconds for the end of the historical data range. Optional.
+    /// - Returns: A `Single` that emits an array of `CoinCap.HisotryPrice` objects on success.
+    func getAssetHistory(slug: String, interval: String, start: Int?, end: Int?) -> Single<[CoinCap.HisotryPrice]>
 }
 
 final class DefaultCoinCapProvider: ApiProvider, CoinCapProvider {
@@ -60,5 +70,24 @@ final class DefaultCoinCapProvider: ApiProvider, CoinCapProvider {
             .get("/assets/\(slug)")
         }
         .map(CoinCap.Asset.self, atKeyPath: "data")
+    }
+    
+    func getAssetHistory(slug: String, interval: String, start: Int?, end: Int?) -> Single<[CoinCap.HisotryPrice]> {
+        struct QueryParameters: Encodable {
+            
+            let interval: String
+            let start: Int?
+            let end: Int?
+        }
+        return request {
+            .coinCap
+            .get("/assets/\(slug)/history")
+            .query(QueryParameters(
+                interval: interval,
+                start: start,
+                end: end
+            ))
+        }
+        .map([CoinCap.HisotryPrice].self, atKeyPath: "data")
     }
 }

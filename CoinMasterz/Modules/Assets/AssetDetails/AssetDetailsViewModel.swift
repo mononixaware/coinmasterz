@@ -6,6 +6,7 @@
 //
 
 import Combine
+import Foundation
 import RxSwift
 
 final class AssetDetailsViewModel: ObservableObject {
@@ -25,11 +26,23 @@ final class AssetDetailsViewModel: ObservableObject {
 
 private extension AssetDetailsViewModel {
     
-    func fetchDetails(assetID: String) {
+    func getDetails(assetID: String) {
         coinCapProvider.getAsset(slug: assetID)
             .map(AssetDetailsModel.builder.makeDetails)
             .subscribe(on: MainScheduler.instance)
             .weak(self) { $0.model.accept(details: $1) }
+            .traceError()
+            .disposed(by: disposeBag)
+    }
+    
+    func getPriceChart(assetID: String) {
+        let start = Date.now.addingDays(-1)?.milliseconds
+        let end = Date.now.milliseconds
+        
+        coinCapProvider.getAssetHistory(slug: assetID, interval: "m15", start: start, end: end)
+            .map(AssetDetailsModel.builder.makePriceChart)
+            .subscribe(on: MainScheduler.instance)
+            .weak(self) { $0.model.accept(priceChart: $1) }
             .traceError()
             .disposed(by: disposeBag)
     }
@@ -42,6 +55,7 @@ extension AssetDetailsViewModel: AssetDetailsViewInput {
     }
     
     func loadContets() {
-        fetchDetails(assetID: model.assetID)
+        getDetails(assetID: model.assetID)
+        getPriceChart(assetID: model.assetID)
     }
 }

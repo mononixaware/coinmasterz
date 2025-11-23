@@ -9,11 +9,14 @@ struct AssetDetailsModel {
     
     let assetID: String
     private(set) var details: Details?
+    private(set) var priceChart: PriceChart?
     
     init(assetID: String,
-         details: Details? = nil) {
+         details: Details? = nil,
+         priceChart: PriceChart? = nil) {
         self.assetID = assetID
         self.details = details
+        self.priceChart = priceChart
     }
 }
 
@@ -26,8 +29,12 @@ extension AssetDetailsModel {
 
 extension AssetDetailsModel {
     
-    mutating func accept(details: Details) {
+    mutating func accept(details: Details?) {
         self.details = details
+    }
+    
+    mutating func accept(priceChart: PriceChart?) {
+        self.priceChart = priceChart
     }
 }
 

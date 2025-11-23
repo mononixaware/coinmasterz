@@ -34,6 +34,11 @@ struct AssetDetailsViewUI: View {
                         .padding(16)
                 }
                 
+                if let priceChart = viewModel.model.priceChart {
+                    AssetDetailsViewComponents.PriceChart(priceChart: priceChart)
+                        .frame(height: 300)
+                }
+                
                 Spacer()
             }
         }
