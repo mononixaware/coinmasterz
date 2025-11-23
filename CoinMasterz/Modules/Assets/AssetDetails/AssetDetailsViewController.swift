@@ -36,7 +36,7 @@ struct AssetDetailsViewUI: View {
                 
                 if let priceChart = viewModel.model.priceChart {
                     AssetDetailsViewComponents.PriceChart(priceChart: priceChart)
-                        .frame(height: 300)
+                        .frame(height: 360)
                 }
                 
                 Spacer()

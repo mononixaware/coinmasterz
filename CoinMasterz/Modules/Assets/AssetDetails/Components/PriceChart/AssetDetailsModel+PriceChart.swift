@@ -15,12 +15,22 @@ extension AssetDetailsModel {
         let minPrice: Double
         let maxPrice: Double
         let color: Color
+        let metrics: Metrics
         
         struct PriceData: Identifiable {
             
             let id: Int
             let date: Date
             let price: Double
+        }
+        
+        struct Metrics {
+            
+            let high: String
+            let low: String
+            let changeValue: String
+            let changeAbsoluteValue: String
+            let changeColor: Color
         }
     }
 }
@@ -52,11 +62,23 @@ extension AssetDetailsModelBuilder {
         let minPrice = prices.min().orZero
         let maxPrice = prices.max().orZero
         
+        let changeValue = ((maxPrice - minPrice) / minPrice * 100).format2.appending("%")
+        let changeAbsoluteValue = NumberFormatter.priceFormat((maxPrice - minPrice))
+        
+        let metrics = AssetDetailsModel.PriceChart.Metrics(
+            high: NumberFormatter.priceFormat(maxPrice),
+            low: NumberFormatter.priceFormat(minPrice),
+            changeValue: changeValue,
+            changeAbsoluteValue: changeAbsoluteValue,
+            changeColor: color
+        )
+        
         return AssetDetailsModel.PriceChart(
             pricesData: pricesData,
             minPrice: minPrice,
             maxPrice: maxPrice,
-            color: color
+            color: color,
+            metrics: metrics
         )
     }
 }

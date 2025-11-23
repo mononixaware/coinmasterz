@@ -24,6 +24,32 @@ extension AssetDetailsViewComponents {
         }
         
         var body: some View {
+            VStack(alignment: .leading, spacing: 12.0) {
+                ChartComponent(selectedDate: selectedDate, priceChart: priceChart)
+                
+                Metrics(metrics: priceChart.metrics)
+                    .padding(.horizontal, 16)
+            }
+        }
+    }
+}
+
+private extension AssetDetailsViewComponents {
+    
+    // MARK: ChartComponent
+    
+    struct ChartComponent: View {
+        
+        @State private var selectedDate: Date?
+        let priceChart: AssetDetailsModel.PriceChart
+        
+        init(selectedDate: Date? = nil,
+             priceChart: AssetDetailsModel.PriceChart) {
+            self.selectedDate = selectedDate
+            self.priceChart = priceChart
+        }
+        
+        var body: some View {
             Chart(priceChart.pricesData) { priceData in
                 LineMark(
                     x: .value("Date", priceData.date),
@@ -51,7 +77,7 @@ extension AssetDetailsViewComponents {
                         .annotation(position: .top, spacing: 0) {
                             if let selectedPrice = findPrice(for: selectedDate) {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(selectedDate, format: .dateTime.hour().minute())
+                                    Text(selectedDate, format: .dateTime.day().hour().minute())
                                         .font(.caption)
                                         .foregroundStyle(Color(uiColor: .secondaryLabel))
                                     
@@ -99,10 +125,60 @@ extension AssetDetailsViewComponents {
         }
         
         private func findPrice(for date: Date) -> Double? {
-            // Find the closest data point to the selected date
             priceChart.pricesData
                 .min(by: { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) })?
                 .price
+        }
+    }
+    
+    // MARK: Metrics
+    
+    struct Metrics: View {
+        
+        let metrics: AssetDetailsModel.PriceChart.Metrics
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 8.0) {
+                HStack(alignment: .top, spacing: 8.0) {
+                    Text(metrics.high)
+                        .font(.body)
+                        .foregroundStyle(Color(uiColor: .label))
+                    
+                    Text("High")
+                        .font(.body)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                }
+                
+                HStack(alignment: .top, spacing: 8.0) {
+                    Text(metrics.low)
+                        .font(.body)
+                        .foregroundStyle(Color(uiColor: .label))
+                    
+                    Text("Low")
+                        .font(.body)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                }
+                
+                HStack(alignment: .top, spacing: 8.0) {
+                    Text(metrics.changeValue)
+                        .font(.body)
+                        .foregroundStyle(metrics.changeColor)
+                    
+                    Text("Period Change")
+                        .font(.body)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                }
+                
+                HStack(alignment: .top, spacing: 8.0) {
+                    Text(metrics.changeAbsoluteValue)
+                        .font(.body)
+                        .foregroundStyle(metrics.changeColor)
+                    
+                    Text("Period Absolute Change")
+                        .font(.body)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                }
+            }
         }
     }
 }
