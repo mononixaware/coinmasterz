@@ -7,6 +7,8 @@
 
 enum CoinCap {
     
+    // MARK: Decodable
+    
     struct Asset: Decodable {
         
         let id: String
@@ -23,10 +25,25 @@ enum CoinCap {
         let explore: String?
     }
     
-    struct HisotryPrice: Decodable {
+    struct HistoryPrice: Decodable {
         
         let priceUsd: String
         let time: Int
         let date: String
+    }
+    
+    // MARK: Codable
+    
+    enum AssetHistoryInterval: String, Codable {
+        
+        case oneMinute = "m1"
+        case fiveMinutes = "m5"
+        case fifteenMinutes = "m15"
+        case thirtyMinutes = "m30"
+        case oneHour = "h1"
+        case twoHours = "h2"
+        case sixHours = "h6"
+        case twelveHours = "h12"
+        case oneDay = "d1"
     }
 }

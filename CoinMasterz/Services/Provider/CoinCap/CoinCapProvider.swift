@@ -32,11 +32,14 @@ protocol CoinCapProvider {
     ///
     /// - Parameters:
     ///   - slug: The unique identifier for the asset (e.g., "bitcoin", "ethereum").
-    ///   - interval: Time interval for data points. Valid choices: "m1", "m5", "m15", "m30", "h1", "h2", "h6", "h12", "d1".
+    ///   - interval: Time interval for data points (e.g., `.oneMinute`, `.fiveMinutes`, `.fifteenMinutes`, `.thirtyMinutes`, `.oneHour`, `.twoHours`, `.sixHours`, `.twelveHours`, `.oneDay`).
     ///   - start: UNIX time in milliseconds for the start of the historical data range. Omitting will return the most recent asset history. Optional.
     ///   - end: UNIX time in milliseconds for the end of the historical data range. Optional.
-    /// - Returns: A `Single` that emits an array of `CoinCap.HisotryPrice` objects on success.
-    func getAssetHistory(slug: String, interval: String, start: Int?, end: Int?) -> Single<[CoinCap.HisotryPrice]>
+    /// - Returns: A `Single` that emits an array of `CoinCap.HistoryPrice` objects on success.
+    func getAssetHistory(slug: String,
+                         interval: CoinCap.AssetHistoryInterval,
+                         start: Int?,
+                         end: Int?) -> Single<[CoinCap.HistoryPrice]>
 }
 
 final class DefaultCoinCapProvider: ApiProvider, CoinCapProvider {
@@ -72,10 +75,13 @@ final class DefaultCoinCapProvider: ApiProvider, CoinCapProvider {
         .map(CoinCap.Asset.self, atKeyPath: "data")
     }
     
-    func getAssetHistory(slug: String, interval: String, start: Int?, end: Int?) -> Single<[CoinCap.HisotryPrice]> {
+    func getAssetHistory(slug: String,
+                         interval: CoinCap.AssetHistoryInterval,
+                         start: Int?,
+                         end: Int?) -> Single<[CoinCap.HistoryPrice]> {
         struct QueryParameters: Encodable {
             
-            let interval: String
+            let interval: CoinCap.AssetHistoryInterval
             let start: Int?
             let end: Int?
         }
@@ -88,6 +94,6 @@ final class DefaultCoinCapProvider: ApiProvider, CoinCapProvider {
                 end: end
             ))
         }
-        .map([CoinCap.HisotryPrice].self, atKeyPath: "data")
+        .map([CoinCap.HistoryPrice].self, atKeyPath: "data")
     }
 }

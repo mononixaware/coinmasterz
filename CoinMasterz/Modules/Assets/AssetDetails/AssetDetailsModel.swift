@@ -9,14 +9,19 @@ struct AssetDetailsModel {
     
     let assetID: String
     private(set) var details: Details?
-    private(set) var priceChart: PriceChart?
+    private(set) var priceChart: PriceChart
     
     init(assetID: String,
          details: Details? = nil,
-         priceChart: PriceChart? = nil) {
+         priceChart: PriceChart = .initial) {
         self.assetID = assetID
         self.details = details
         self.priceChart = priceChart
+    }
+    
+    enum Context {
+        
+        case loading, loaded, empty
     }
 }
 
@@ -33,8 +38,16 @@ extension AssetDetailsModel {
         self.details = details
     }
     
-    mutating func accept(priceChart: PriceChart?) {
-        self.priceChart = priceChart
+    mutating func changePriceChartContext(to state: Context) {
+        priceChart.changeContext(to: state)
+    }
+    
+    mutating func acceptPriceChart(data: PriceChart.Data?) {
+        priceChart.accept(data: data)
+    }
+    
+    mutating func selectPriceChart(interval: PriceChart.Interval) {
+        priceChart.select(interval: interval)
     }
 }
 

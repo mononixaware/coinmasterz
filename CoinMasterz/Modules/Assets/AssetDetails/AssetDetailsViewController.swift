@@ -34,10 +34,11 @@ struct AssetDetailsViewUI: View {
                         .padding(16)
                 }
                 
-                if let priceChart = viewModel.model.priceChart {
-                    AssetDetailsViewComponents.PriceChart(priceChart: priceChart)
-                        .frame(height: 360)
-                }
+                AssetDetailsViewComponents.PriceChart(
+                    priceChart: viewModel.model.priceChart,
+                    intervalSelectAction: viewModel.selectPriceChartInterval
+                )
+                .frame(height: 360)
                 
                 Spacer()
             }

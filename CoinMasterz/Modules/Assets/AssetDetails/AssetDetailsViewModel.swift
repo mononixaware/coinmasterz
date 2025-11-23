@@ -22,6 +22,8 @@ final class AssetDetailsViewModel: ObservableObject {
         self.coinCapProvider = coinCapProvider
         self.model = model
     }
+    
+    func selectPriceChartInterval(_ interval: AssetDetailsModel.PriceChart.Interval) { handlePriceChartIntervalSelection(interval) }
 }
 
 private extension AssetDetailsViewModel {
@@ -36,15 +38,39 @@ private extension AssetDetailsViewModel {
     }
     
     func getPriceChart(assetID: String) {
-        let start = Date.now.addingDays(-1)?.milliseconds
+        let interval: CoinCap.AssetHistoryInterval = switch model.priceChart.selectedInterval.kind {
+        case .oneDay: .fifteenMinutes
+        case .oneWeek: .oneHour
+        case .oneMonth: .sixHours
+        case .threeMonths: .oneDay
+        }
+        let days = switch model.priceChart.selectedInterval.kind {
+        case .oneDay: 1
+        case .oneWeek: 7
+        case .oneMonth: 30
+        case .threeMonths: 90
+        }
+        let start = Date.now.addingDays(days * -1)?.milliseconds
         let end = Date.now.milliseconds
         
-        coinCapProvider.getAssetHistory(slug: assetID, interval: "m15", start: start, end: end)
-            .map(AssetDetailsModel.builder.makePriceChart)
+        coinCapProvider.getAssetHistory(slug: assetID, interval: interval, start: start, end: end)
+            .map(AssetDetailsModel.builder.makePriceChartData)
             .subscribe(on: MainScheduler.instance)
-            .weak(self) { $0.model.accept(priceChart: $1) }
+            .weak(self) { $0.model.acceptPriceChart(data: $1) }
             .traceError()
             .disposed(by: disposeBag)
+    }
+}
+
+private extension AssetDetailsViewModel {
+    
+    func handlePriceChartIntervalSelection(_ interval: AssetDetailsModel.PriceChart.Interval) {
+        guard model.priceChart.selectedInterval.kind != interval.kind else { return }
+        
+        disposeBag = DisposeBag()
+        model.selectPriceChart(interval: interval)
+        model.changePriceChartContext(to: .loading)
+        getPriceChart(assetID: model.assetID)
     }
 }
 

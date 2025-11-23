@@ -14,21 +14,26 @@ extension AssetDetailsViewComponents {
     
     struct PriceChart: View {
         
-        @State private var selectedDate: Date?
         let priceChart: AssetDetailsModel.PriceChart
-        
-        init(selectedDate: Date? = nil,
-             priceChart: AssetDetailsModel.PriceChart) {
-            self.selectedDate = selectedDate
-            self.priceChart = priceChart
-        }
+        let intervalSelectAction: Callback<AssetDetailsModel.PriceChart.Interval>
         
         var body: some View {
-            VStack(alignment: .leading, spacing: 12.0) {
-                ChartComponent(selectedDate: selectedDate, priceChart: priceChart)
+            VStack(alignment: .leading, spacing: 16.0) {
+                if let data = priceChart.data {
+                    VStack(spacing: 12.0) {
+                        ChartComponent(data: data)
+                        
+                        IntervalSelection(
+                            intervals: priceChart.intervals,
+                            selectedInterval: priceChart.selectedInterval,
+                            selectAction: intervalSelectAction
+                        )
+                        .padding(.horizontal, 64)
+                    }
                 
-                Metrics(metrics: priceChart.metrics)
+                Metrics(metrics: data.metrics)
                     .padding(.horizontal, 16)
+                }
             }
         }
     }
@@ -40,31 +45,25 @@ private extension AssetDetailsViewComponents {
     
     struct ChartComponent: View {
         
-        @State private var selectedDate: Date?
-        let priceChart: AssetDetailsModel.PriceChart
-        
-        init(selectedDate: Date? = nil,
-             priceChart: AssetDetailsModel.PriceChart) {
-            self.selectedDate = selectedDate
-            self.priceChart = priceChart
-        }
+        @State private var selectedDate: Date? = nil
+        let data: AssetDetailsModel.PriceChart.Data
         
         var body: some View {
-            Chart(priceChart.pricesData) { priceData in
+            Chart(data.prices) { price in
                 LineMark(
-                    x: .value("Date", priceData.date),
-                    y: .value("Price", priceData.price)
+                    x: .value("Date", price.date),
+                    y: .value("Price", price.value)
                 )
-                .foregroundStyle(priceChart.color)
+                .foregroundStyle(data.color)
                 
                 AreaMark(
-                    x: .value("Date", priceData.date),
-                    yStart: .value("Baseline", (priceChart.minPrice * 0.995)),
-                    yEnd: .value("Price", priceData.price)
+                    x: .value("Date", price.date),
+                    yStart: .value("Baseline", (data.minPriceValue * 0.99)),
+                    yEnd: .value("Price", price.value)
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        gradient: Gradient(colors: [priceChart.color.opacity(0.3), priceChart.color.opacity(0.05)]),
+                        gradient: Gradient(colors: [data.color.opacity(0.3), data.color.opacity(0.05)]),
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -77,13 +76,13 @@ private extension AssetDetailsViewComponents {
                         .annotation(position: .top, spacing: 0) {
                             if let selectedPrice = findPrice(for: selectedDate) {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(selectedDate, format: .dateTime.day().hour().minute())
+                                    Text(selectedDate, format: data.dateFormatStyle)
                                         .font(.caption)
                                         .foregroundStyle(Color(uiColor: .secondaryLabel))
                                     
                                     Text(NumberFormatter.priceFormat(selectedPrice))
                                         .font(.headline)
-                                        .foregroundStyle(priceChart.color)
+                                        .foregroundStyle(data.color)
                                 }
                                 .padding(8)
                                 .overlay(
@@ -104,12 +103,12 @@ private extension AssetDetailsViewComponents {
                         }
                 }
             }
-            .chartYScale(domain: (priceChart.minPrice * 0.995)...(priceChart.maxPrice * 1.005))
+            .chartYScale(domain: (data.minPriceValue * 0.99)...(data.maxPriceValue * 1.01))
             .chartXSelection(value: $selectedDate)
             .chartXAxis {
                 AxisMarks(values: .automatic) { value in
                     AxisGridLine()
-                    AxisValueLabel(format: .dateTime.hour().minute())
+                    AxisValueLabel(format: data.dateFormatStyle)
                 }
             }
             .chartYAxis {
@@ -125,9 +124,27 @@ private extension AssetDetailsViewComponents {
         }
         
         private func findPrice(for date: Date) -> Double? {
-            priceChart.pricesData
+            data.prices
                 .min(by: { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) })?
-                .price
+                .value
+        }
+    }
+    
+    // MARK: IntervalSelection
+    
+    struct IntervalSelection: View {
+        
+        let intervals: [AssetDetailsModel.PriceChart.Interval]
+        let selectedInterval: AssetDetailsModel.PriceChart.Interval
+        let selectAction: Callback<AssetDetailsModel.PriceChart.Interval>?
+        
+        var body: some View {
+            Picker("Interval", selection: Binding(get: { selectedInterval }, set: { selectAction?($0) })) {
+                ForEach(intervals) { interval in
+                    Text(interval.title).tag(interval)
+                }
+            }
+            .pickerStyle(.segmented)
         }
     }
     
@@ -135,7 +152,7 @@ private extension AssetDetailsViewComponents {
     
     struct Metrics: View {
         
-        let metrics: AssetDetailsModel.PriceChart.Metrics
+        let metrics: AssetDetailsModel.PriceChart.Data.Metrics
         
         var body: some View {
             VStack(alignment: .leading, spacing: 8.0) {
