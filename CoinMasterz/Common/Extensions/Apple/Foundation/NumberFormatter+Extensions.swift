@@ -74,4 +74,21 @@ extension NumberFormatter {
         default: NumberFormatter.twoDigits.string(for: price).orEmpty
         }
     }
+    
+    static func bigNumberFormat(_ number: Double) -> String {
+        switch number {
+        case let value where value.magnitude > 1e15:
+            return Int(number / 1e15).stringValue + "P"
+        case let value where value.magnitude > 1e12:
+            return Int(number / 1e12).stringValue + "T"
+        case let value where value.magnitude > 1e9:
+            return Int(number / 1e9).stringValue + "B"
+        case let value where value.magnitude > 1e6:
+            return Int(number / 1e6).stringValue + "M"
+        case let value where value.magnitude > 1e3:
+            return Int(number / 1e3).stringValue + "K"
+        default:
+            return Int(number).stringValue
+        }
+    }
 }

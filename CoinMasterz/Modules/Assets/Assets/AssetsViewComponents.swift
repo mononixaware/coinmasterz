@@ -9,6 +9,8 @@ import SwiftUI
 
 enum AssetsViewComponents {
     
+    // MARK: Entity
+    
     struct Entity: View {
         
         let entity: AssetsModel.Entity
@@ -21,11 +23,11 @@ enum AssetsViewComponents {
                     VStack(alignment: .leading, spacing: 4.0) {
                         Text(entity.symbol)
                             .font(.title3.weight(.semibold))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(Color(uiColor: .label))
                         
                         Text(entity.name)
                             .font(.body)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color(uiColor: .secondaryLabel))
                             .lineLimit(1)
                     }
                 }
@@ -35,7 +37,7 @@ enum AssetsViewComponents {
                 VStack(alignment: .trailing, spacing: 4.0) {
                     Text(entity.priceDisplayValue)
                         .font(.title3.weight(.semibold))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(Color(uiColor: .label))
                         .lineLimit(1)
                     
                     Text(entity.changePercentDynamics.displayValue)
@@ -51,6 +53,8 @@ enum AssetsViewComponents {
 
 private extension AssetsViewComponents {
     
+    // MARK: EntityImage
+    
     struct EntityImage: View {
         
         let initials: String
@@ -58,11 +62,11 @@ private extension AssetsViewComponents {
         var body: some View {
             ZStack {
                 Circle()
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color(uiColor: .secondarySystemFill))
                 
                 Text(initials)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(uiColor: .label))
                     .padding(4)
             }
             .frame(width: 48.0, height: 48.0)

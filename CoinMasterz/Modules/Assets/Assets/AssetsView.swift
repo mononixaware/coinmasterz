@@ -10,6 +10,7 @@ import Combine
 enum AssetsViewSteps {
     
     case sortSelected(selected: AssetsModel.SortKind, selectCompletion: Callback<AssetsModel.SortKind>?)
+    case assetSelected(assetID: String)
 }
 
 protocol AssetsViewOutput: AnyObject {

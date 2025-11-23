@@ -10,6 +10,17 @@ import Swinject
 final class ModuleAssembly: Assembly {
     
     func assemble(container: Container) {
+        container.register(AssetDetailsView.self) { r, model in
+            let viewModel = AssetDetailsViewModel(
+                coinCapProvider: r.resolve(),
+                model: model
+            )
+            let viewUI = AssetDetailsViewUI(viewModel: viewModel)
+            let view = AssetDetailsViewController(rootView: viewUI)
+            viewModel.bind(output: view)
+            view.viewModel = viewModel
+            return view
+        }
         container.register(AssetsSortView.self) { r, model in
             let viewModel = AssetsSortViewModel(
                 model: model

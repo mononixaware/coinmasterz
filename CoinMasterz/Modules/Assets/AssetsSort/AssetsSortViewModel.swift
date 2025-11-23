@@ -6,7 +6,6 @@
 //
 
 import Combine
-import RxSwift
 
 final class AssetsSortViewModel: ObservableObject {
     

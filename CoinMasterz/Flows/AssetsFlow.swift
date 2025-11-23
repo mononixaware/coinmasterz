@@ -30,10 +30,17 @@ private extension DefaultAssetsFlow {
             case let .sortSelected(selectedKind, selectCompletion):
                 let model = AssetsSortModel(selectedKind: selectedKind)
                 self?.showAssetsSortView(with: model, selectCompletion: selectCompletion)
+            case let .assetSelected(assetID):
+                self?.showAssetDetailsView(with: AssetDetailsModel(assetID: assetID))
             }
         }
         .store(in: &view.stepsBag)
         setRoot(view)
+    }
+    
+    func showAssetDetailsView(with model: AssetDetailsModel) {
+        let view = makeAssetDetailsView(with: model)
+        push(view, hideBottomBar: true)
     }
     
     func showAssetsSortView(with model: AssetsSortModel, selectCompletion: Callback<AssetsSortModel.Kind>?) {

@@ -118,7 +118,11 @@ extension AssetsModel {
 
 extension AssetsModel.Entity.Dynamics {
     
-    static let zero = AssetsModel.Entity.Dynamics(value: 0, displayValue: "0.00%", color: .secondary)
+    static let zero = AssetsModel.Entity.Dynamics(
+        value: 0,
+        displayValue: "0.00%",
+        color: Color(uiColor: .secondaryLabel)
+    )
 }
 
 // MARK: Builder
@@ -151,7 +155,7 @@ enum AssetsModelBuilder {
         
         let color: Color = switch value {
         case ..<0: .red
-        case 0: .secondary
+        case 0: Color(uiColor: .secondaryLabel)
         default: .green
         }
         

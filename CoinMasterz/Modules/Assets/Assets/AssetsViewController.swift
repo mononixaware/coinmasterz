@@ -77,7 +77,11 @@ private extension AssetsViewUI {
         ScrollView(.vertical) {
             LazyVStack(spacing: 16.0) {
                 ForEach(viewModel.model.displayEntities) { entity in
-                    AssetsViewComponents.Entity(entity: entity)
+                    Button {
+                        viewModel.select(entity: entity)
+                    } label: {
+                        AssetsViewComponents.Entity(entity: entity)
+                    }
                     
                     Divider()
                         .padding(.leading, 60)

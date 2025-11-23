@@ -27,6 +27,8 @@ final class AssetsViewModel: ObservableObject {
         setupSearchDebouncing()
     }
     
+    func select(entity: AssetsModel.Entity) { output?.steps.send(.assetSelected(assetID: entity.id)) }
+    
     func getMoreAssets() { handleGetMoreAssets() }
     
     func refresh() async { await handleRefresh() }
@@ -104,6 +106,8 @@ extension AssetsViewModel: AssetsViewInput {
     }
     
     func loadContets() {
+        guard model.context != .loaded else { return }
+        
         model.reset()
         getEntities(loadMore: false)
     }

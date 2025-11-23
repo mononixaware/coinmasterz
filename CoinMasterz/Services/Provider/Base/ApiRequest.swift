@@ -36,16 +36,15 @@ extension ApiRequest {
         ApiRequest(baseUrl: baseUrl)
     }
     
-    static var coinCap: ApiRequest {
+    static let coinCap: ApiRequest = {
         guard let baseURL = try? Configuration.coinCapBaseURL,
               let authKey = try? Configuration.coinCapAuthBearerKey,
               let authToken = try? Configuration.coinCapBearerToken else {
-            fatalError("CoinCap base URL not configured properly")
+            fatalError("CoinCap base URL or auth key or auth token not configured properly")
         }
         
-        return ApiRequest(baseUrl: baseURL)
-            .header(authKey, "Bearer " + authToken)
-    }
+        return .to(baseURL).header(authKey, "Bearer " + authToken)
+    }()
     
     // MARK: - Set method and path
     

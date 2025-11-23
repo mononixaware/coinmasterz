@@ -21,6 +21,12 @@ protocol CoinCapProvider {
     ///   - offset: Number of results to skip for pagination. Default is 0 if not specified. Optional.
     /// - Returns: A `Single` that emits an array of `CoinCap.Asset` objects on success.
     func getAssets(search: String?, ids: String?, limit: Int?, offset: Int?) -> Single<[CoinCap.Asset]>
+    
+    /// Fetches a single cryptocurrency asset by its identifier.
+    ///
+    /// - Parameter slug: The unique identifier for the asset (e.g., "bitcoin", "ethereum").
+    /// - Returns: A `Single` that emits a `CoinCap.Asset` object on success.
+    func getAsset(slug: String) -> Single<CoinCap.Asset>
 }
 
 final class DefaultCoinCapProvider: ApiProvider, CoinCapProvider {
@@ -46,5 +52,13 @@ final class DefaultCoinCapProvider: ApiProvider, CoinCapProvider {
             ))
         }
         .map([CoinCap.Asset].self, atKeyPath: "data")
+    }
+    
+    func getAsset(slug: String) -> Single<CoinCap.Asset> {
+        request {
+            .coinCap
+            .get("/assets/\(slug)")
+        }
+        .map(CoinCap.Asset.self, atKeyPath: "data")
     }
 }
