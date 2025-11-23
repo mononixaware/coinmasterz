@@ -62,11 +62,12 @@ struct AssetsViewUI: View {
             }
         }
         .searchable(
-            text: Binding(get: { viewModel.model.searchQuery }, set: { viewModel.changeSearchQuery($0) }),
+            text: $viewModel.searchQuery,
             placement: .navigationBarDrawer(displayMode: .automatic),
             prompt: "Search by name or symbol"
         )
         .scrollDismissesKeyboard(.interactively)
+        .refreshable(action: viewModel.refresh)
     }
 }
 
@@ -99,15 +100,15 @@ private extension AssetsViewUI {
         ContentUnavailableView {
             Label("No Assets Found", systemImage: "magnifyingglass")
         } description: {
-            if viewModel.model.searchQuery.isEmpty {
+            if viewModel.searchQuery.isEmpty {
                 Text("Unable to load cryptocurrency assets.")
             } else {
-                Text("No results for '\(viewModel.model.searchQuery)'")
+                Text("No results for '\(viewModel.searchQuery)'")
             }
         } actions: {
-            if viewModel.model.searchQuery.isNotEmpty {
+            if viewModel.searchQuery.isNotEmpty {
                 Button("Clear Search") {
-                    viewModel.changeSearchQuery(.empty)
+                    viewModel.searchQuery = ""
                 }
                 .buttonStyle(.bordered)
             }

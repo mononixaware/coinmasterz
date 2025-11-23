@@ -12,6 +12,7 @@ import RxSwift
 final class AssetsViewModel: ObservableObject {
     
     @Published private(set) var model: AssetsModel
+    @Published var searchQuery: String = ""
     
     private weak var output: AssetsViewOutput?
     private let coinCapProvider: CoinCapProvider
@@ -26,24 +27,29 @@ final class AssetsViewModel: ObservableObject {
         setupSearchDebouncing()
     }
     
-    func changeSearchQuery(_ query: String) { model.accept(searchQuery: query) }
-    
     func getMoreAssets() { handleGetMoreAssets() }
+    
+    func refresh() async { await handleRefresh() }
 }
 
 private extension AssetsViewModel {
     
-    func getAssets(loadMore: Bool) {
+    func fetchEntities() -> Single<[AssetsModel.Entity]> {
+        let search = searchQuery.nonEmpty
+        let limit = AssetsModel.defaultEntitiesCount
+        let offset = model.displayEntities.count
+        
+        return coinCapProvider.getAssets(search: search, ids: nil, limit: limit, offset: offset)
+            .map(AssetsModel.builder.makeEntities)
+            .traceError()
+    }
+    
+    func getEntities(loadMore: Bool) {
         if loadMore {
             model.changeLoadMoreContext(to: .loading)
         }
         
-        let search = model.searchQuery.nonEmpty
-        let limit = AssetsModel.defaultEntitiesCount
-        let offset = model.displayEntities.count
-        
-        coinCapProvider.getAssets(search: search, ids: nil, limit: limit, offset: offset)
-            .map(AssetsModel.builder.makeEntities)
+        fetchEntities()
             .subscribe(on: MainScheduler.instance)
             .weak(self) {
                 if loadMore {
@@ -52,7 +58,6 @@ private extension AssetsViewModel {
                     $0.model.accept(entities: $1)
                 }
             }
-            .traceError()
             .disposed(by: disposeBag)
     }
 }
@@ -62,22 +67,26 @@ private extension AssetsViewModel {
     func handleGetMoreAssets() {
         guard model.context == .loaded && model.loadMoreContext == .loaded else { return }
         
-        getAssets(loadMore: true)
+        getEntities(loadMore: true)
     }
     
     func handleSearchQueryChanged(_ query: String) {
         disposeBag = DisposeBag()
-        model.accept(searchQuery: query)
         model.resetForSearch()
-        getAssets(loadMore: false)
+        getEntities(loadMore: false)
+    }
+    
+    func handleRefresh() async {
+        disposeBag = DisposeBag()
+        let entities = try? await fetchEntities().value
+        model.accept(entities: entities ?? [])
     }
 }
 
 private extension AssetsViewModel {
     
     func setupSearchDebouncing() {
-        $model
-            .map(\.searchQuery)
+        $searchQuery
             .dropFirst() // Ignore initial empty value
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .removeDuplicates()
@@ -96,7 +105,7 @@ extension AssetsViewModel: AssetsViewInput {
     
     func loadContets() {
         model.reset()
-        getAssets(loadMore: false)
+        getEntities(loadMore: false)
     }
     
     func selectSort() {
