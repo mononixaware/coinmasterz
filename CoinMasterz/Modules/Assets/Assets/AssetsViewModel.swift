@@ -6,6 +6,7 @@
 //
 
 import Combine
+import Foundation
 import RxSwift
 
 final class AssetsViewModel: ObservableObject {
@@ -15,12 +16,17 @@ final class AssetsViewModel: ObservableObject {
     private weak var output: AssetsViewOutput?
     private let coinCapProvider: CoinCapProvider
     private var disposeBag = DisposeBag()
+    private var cancelBag = CancelBag()
     
     init(coinCapProvider: CoinCapProvider,
          model: AssetsModel) {
         self.coinCapProvider = coinCapProvider
         self.model = model
+        
+        setupSearchDebouncing()
     }
+    
+    func changeSearchQuery(_ query: String) { model.accept(searchQuery: query) }
     
     func getMoreAssets() { handleGetMoreAssets() }
 }
@@ -32,10 +38,11 @@ private extension AssetsViewModel {
             model.changeLoadMoreContext(to: .loading)
         }
         
+        let search = model.searchQuery.nonEmpty
         let limit = AssetsModel.defaultEntitiesCount
         let offset = model.displayEntities.count
         
-        coinCapProvider.getAssets(search: nil, ids: nil, limit: limit, offset: offset)
+        coinCapProvider.getAssets(search: search, ids: nil, limit: limit, offset: offset)
             .map(AssetsModel.builder.makeEntities)
             .subscribe(on: MainScheduler.instance)
             .weak(self) {
@@ -56,6 +63,28 @@ private extension AssetsViewModel {
         guard model.context == .loaded && model.loadMoreContext == .loaded else { return }
         
         getAssets(loadMore: true)
+    }
+    
+    func handleSearchQueryChanged(_ query: String) {
+        disposeBag = DisposeBag()
+        model.accept(searchQuery: query)
+        model.resetForSearch()
+        getAssets(loadMore: false)
+    }
+}
+
+private extension AssetsViewModel {
+    
+    func setupSearchDebouncing() {
+        $model
+            .map(\.searchQuery)
+            .dropFirst() // Ignore initial empty value
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { [weak self] query in
+                self?.handleSearchQueryChanged(query)
+            }
+            .store(in: &cancelBag)
     }
 }
 

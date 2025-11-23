@@ -51,6 +51,28 @@ struct AssetsViewUI: View {
     }
     
     var body: some View {
+        Group {
+            switch viewModel.model.context {
+            case .loading:
+                ProgressView("Loading assets...")
+            case .loaded:
+                assetsListContent
+            case .empty:
+                emptyStateView
+            }
+        }
+        .searchable(
+            text: Binding(get: { viewModel.model.searchQuery }, set: { viewModel.changeSearchQuery($0) }),
+            placement: .navigationBarDrawer(displayMode: .automatic),
+            prompt: "Search by name or symbol"
+        )
+        .scrollDismissesKeyboard(.interactively)
+    }
+}
+
+private extension AssetsViewUI {
+    
+    var assetsListContent: some View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 16.0) {
                 ForEach(viewModel.model.displayEntities) { entity in
@@ -70,6 +92,25 @@ struct AssetsViewUI: View {
                 }
             }
             .padding(16)
+        }
+    }
+    
+    private var emptyStateView: some View {
+        ContentUnavailableView {
+            Label("No Assets Found", systemImage: "magnifyingglass")
+        } description: {
+            if viewModel.model.searchQuery.isEmpty {
+                Text("Unable to load cryptocurrency assets.")
+            } else {
+                Text("No results for '\(viewModel.model.searchQuery)'")
+            }
+        } actions: {
+            if viewModel.model.searchQuery.isNotEmpty {
+                Button("Clear Search") {
+                    viewModel.changeSearchQuery(.empty)
+                }
+                .buttonStyle(.bordered)
+            }
         }
     }
 }

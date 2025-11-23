@@ -13,15 +13,18 @@ struct AssetsModel {
     private(set) var loadMoreContext: Context
     private(set) var sortKind: SortKind
     private var entities: [Entity]
+    private(set) var searchQuery: String
     
     init(context: Context = .loading,
          loadMoreContext: Context = .loaded,
          sortKind: SortKind = .default,
-         entities: [Entity] = []) {
+         entities: [Entity] = [],
+         searchQuery: String = .empty) {
         self.context = context
         self.loadMoreContext = loadMoreContext
         self.sortKind = sortKind
         self.entities = entities
+        self.searchQuery = searchQuery
     }
     
     enum Context {
@@ -102,8 +105,18 @@ extension AssetsModel {
         changeLoadMoreContext(to: newEntities.count < Self.defaultEntitiesCount ? .empty : .loaded)
     }
     
+    mutating func accept(searchQuery: String) {
+        self.searchQuery = searchQuery
+    }
+    
     mutating func reset() {
         self = Self.init()
+    }
+    
+    mutating func resetForSearch() {
+        self.entities = []
+        self.context = .loading
+        self.loadMoreContext = .loaded
     }
 }
 
