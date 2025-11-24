@@ -16,18 +16,24 @@ final class AssetsViewModel: ObservableObject {
     
     private weak var output: AssetsViewOutput?
     private let coinCapProvider: CoinCapProvider
+    private let favoritesService: FavoritesService
     private var disposeBag = DisposeBag()
     private var cancelBag = CancelBag()
     
     init(coinCapProvider: CoinCapProvider,
+         favoritesService: FavoritesService,
          model: AssetsModel) {
         self.coinCapProvider = coinCapProvider
+        self.favoritesService = favoritesService
         self.model = model
         
         setupSearchDebouncing()
+        observeFavorites()
     }
     
     func select(entity: AssetsModel.Entity) { output?.steps.send(.assetSelected(assetID: entity.id)) }
+    
+    func toggleFavorite(entityID: String) { favoritesService.toggleFavorite(assetID: entityID) }
     
     func getMoreAssets() { handleGetMoreAssets() }
     
@@ -41,9 +47,12 @@ private extension AssetsViewModel {
         let limit = AssetsModel.defaultEntitiesCount
         let offset = model.displayEntities.count
         
-        return coinCapProvider.getAssets(search: search, ids: nil, limit: limit, offset: offset)
-            .map(AssetsModel.builder.makeEntities)
-            .traceError()
+        return Single.zip(
+            coinCapProvider.getAssets(search: search, ids: nil, limit: limit, offset: offset),
+            Single.just(favoritesService.getAllFavoriteIDs())
+        )
+        .map(AssetsModel.builder.makeEntities)
+        .traceError()
     }
     
     func getEntities(loadMore: Bool) {
@@ -94,6 +103,14 @@ private extension AssetsViewModel {
             .removeDuplicates()
             .sink { [weak self] query in
                 self?.handleSearchQueryChanged(query)
+            }
+            .store(in: &cancelBag)
+    }
+    
+    func observeFavorites() {
+        favoritesService.favoritesPublisher
+            .sink { [weak self] favoriteIDs in
+                self?.model.updateEntities(favoriteIDs: favoriteIDs)
             }
             .store(in: &cancelBag)
     }

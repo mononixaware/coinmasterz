@@ -13,6 +13,7 @@ final class ModuleAssembly: Assembly {
         container.register(AssetDetailsView.self) { r, model in
             let viewModel = AssetDetailsViewModel(
                 coinCapProvider: r.resolve(),
+                favoritesService: r.resolve(),
                 model: model
             )
             let viewUI = AssetDetailsViewUI(viewModel: viewModel)
@@ -35,6 +36,7 @@ final class ModuleAssembly: Assembly {
         container.register(AssetsView.self) { r, model in
             let viewModel = AssetsViewModel(
                 coinCapProvider: r.resolve(),
+                favoritesService: r.resolve(),
                 model: model
             )
             let viewUI = AssetsViewUI(viewModel: viewModel)
@@ -45,7 +47,11 @@ final class ModuleAssembly: Assembly {
         }
         
         container.register(WatchlistView.self) { r, model in
-            let viewModel = WatchlistViewModel(model: model)
+            let viewModel = WatchlistViewModel(
+                coinCapProvider: r.resolve(),
+                favoritesService: r.resolve(),
+                model: model
+            )
             let viewUI = WatchlistViewUI(viewModel: viewModel)
             let view = WatchlistViewController(rootView: viewUI)
             viewModel.bind(output: view)

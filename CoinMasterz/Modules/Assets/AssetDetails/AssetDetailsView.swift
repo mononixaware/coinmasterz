@@ -7,12 +7,15 @@
 
 protocol AssetDetailsViewOutput: AnyObject {
     
+    func updateNavigation(title: String)
+    func updateFavorite(status: Bool)
 }
 
 protocol AssetDetailsViewInput {
     
     func bind(output: AssetDetailsViewOutput)
     func loadContets()
+    func toggleFavorite()
 }
 
 protocol AssetDetailsView: Presentable, AssetDetailsViewOutput {

@@ -74,29 +74,34 @@ struct AssetsViewUI: View {
 private extension AssetsViewUI {
     
     var assetsListContent: some View {
-        ScrollView(.vertical) {
-            LazyVStack(spacing: 16.0) {
-                ForEach(viewModel.model.displayEntities) { entity in
-                    Button {
-                        viewModel.select(entity: entity)
-                    } label: {
-                        AssetsViewComponents.Entity(entity: entity)
-                    }
-                    
-                    Divider()
-                        .padding(.leading, 60)
+        List {
+            ForEach(viewModel.model.displayEntities) { entity in
+                Button {
+                    viewModel.select(entity: entity)
+                } label: {
+                    AssetsViewComponents.Entity(entity: entity)
                 }
-                
-                if viewModel.model.context == .loaded && viewModel.model.loadMoreContext == .loaded {
-                    ProgressView()
-                        .opacity(viewModel.model.loadMoreContext == .loading ? 1.0 : 0.0)
-                        .padding()
-                        .onAppear {
-                            viewModel.getMoreAssets()
-                        }
+                .swipeActions(edge: .leading) {
+                    Button {
+                        viewModel.toggleFavorite(entityID: entity.id)
+                    } label: {
+                        Label(
+                            entity.isFavorite ? "Delete" : "Favorite",
+                            systemImage: entity.isFavorite ? "star.fill" : "star"
+                        )
+                    }
+                    .tint(entity.isFavorite ? .yellow : .gray)
                 }
             }
-            .padding(16)
+            
+            if viewModel.model.context == .loaded && viewModel.model.loadMoreContext == .loaded {
+                ProgressView()
+                    .opacity(viewModel.model.loadMoreContext == .loading ? 1.0 : 0.0)
+                    .padding()
+                    .onAppear {
+                        viewModel.getMoreAssets()
+                    }
+            }
         }
     }
     

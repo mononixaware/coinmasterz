@@ -48,6 +48,7 @@ struct AssetsModel {
         let priceDisplayValue: String
         let changePercentDynamics: Dynamics
         let marketCap: Double
+        private(set) var isFavorite: Bool
         
         struct Dynamics {
             
@@ -103,6 +104,19 @@ extension AssetsModel {
         changeLoadMoreContext(to: newEntities.count < Self.defaultEntitiesCount ? .empty : .loaded)
     }
     
+    mutating func updateEntities(favoriteIDs: Set<String>) {
+        entities.mutate { entity in
+            let isFavorite = favoriteIDs.contains(entity.id)
+            entity.update(favoriteStatus: isFavorite)
+        }
+    }
+    
+    mutating func toggleEntityFavoriteStatus(entityID: String) {
+        if let index = entities.firstIndex(where: { $0.id == entityID }) {
+            entities[index].toggleFavoriteStatus()
+        }
+    }
+    
     mutating func reset() {
         self = Self.init()
     }
@@ -111,6 +125,19 @@ extension AssetsModel {
         self.entities = []
         self.context = .loading
         self.loadMoreContext = .loaded
+    }
+}
+
+// MARK: Entity
+
+extension AssetsModel.Entity {
+    
+    mutating func update(favoriteStatus: Bool) {
+        self.isFavorite = favoriteStatus
+    }
+    
+    mutating func toggleFavoriteStatus() {
+        self.isFavorite.toggle()
     }
 }
 
@@ -129,13 +156,14 @@ extension AssetsModel.Entity.Dynamics {
 
 enum AssetsModelBuilder {
     
-    static func makeEntities(assets: [CoinCap.Asset]) -> [AssetsModel.Entity] {
+    static func makeEntities(assets: [CoinCap.Asset], favoriteIDs: Set<String>) -> [AssetsModel.Entity] {
         assets.map { asset in
             let initials = String(asset.name.initials.prefix(2))
             let price = Double(asset.priceUsd).orZero
             let priceDisplayValue = NumberFormatter.priceFormat(price)
             let changePercentDynamics = asset.changePercent24Hr.flatMap(makeEntityDynamics).orJust(.zero)
             let marketCap = Double(asset.marketCapUsd).orZero
+            let isFavorite = favoriteIDs.contains(asset.id)
             
             return AssetsModel.Entity(
                 id: asset.id,
@@ -145,7 +173,8 @@ enum AssetsModelBuilder {
                 price: price,
                 priceDisplayValue: priceDisplayValue,
                 changePercentDynamics: changePercentDynamics,
-                marketCap: marketCap
+                marketCap: marketCap,
+                isFavorite: isFavorite
             )
         }
     }

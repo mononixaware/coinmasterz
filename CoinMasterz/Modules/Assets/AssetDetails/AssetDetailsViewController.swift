@@ -12,9 +12,43 @@ final class AssetDetailsViewController: BaseHostingController<AssetDetailsViewUI
     
     var viewModel: AssetDetailsViewInput!
     
+    private var favoriteButton: UIBarButtonItem?
+    
+    override func setupNavigation() {
+        super.setupNavigation()
+        setupNavigationBarButtons()
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         viewModel.loadContets()
+    }
+    
+    func updateNavigation(title: String) {
+        navigationItem.title = title
+    }
+    
+    func updateFavorite(status: Bool) {
+        favoriteButton?.image = UIImage(systemName: status ? "star.fill" : "star")
+        favoriteButton?.tintColor = status ? .yellow : .label
+    }
+}
+
+private extension AssetDetailsViewController {
+    
+    func setupNavigationBarButtons() {
+        favoriteButton = UIBarButtonItem(
+            image: UIImage(systemName: "star"),
+            style: .plain,
+            target: self,
+            action: #selector(favoriteButtonTapped)
+        )
+        favoriteButton?.tintColor = .label
+        navigationItem.rightBarButtonItem = favoriteButton
+    }
+    
+    @objc func favoriteButtonTapped() {
+        viewModel.toggleFavorite()
     }
 }
 
@@ -39,10 +73,7 @@ struct AssetDetailsViewUI: View {
                     intervalSelectAction: viewModel.selectPriceChartInterval
                 )
                 .frame(height: 360)
-                
-                Spacer()
             }
         }
-        .navigationTitle(viewModel.model.details.flatMap(\.symbol).orEmpty)
     }
 }

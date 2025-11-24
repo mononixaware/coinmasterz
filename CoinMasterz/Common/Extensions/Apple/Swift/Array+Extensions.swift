@@ -22,6 +22,12 @@ public extension Array {
     func prepending(contentsOf collection: [Element]) -> Self {
         collection + self
     }
+    
+    func mutating(_ mutation: (inout Element) -> Void) -> Self {
+        var array = self
+        array.mutate(mutation)
+        return array
+    }
 }
 
 public extension Array where Element: StringProtocol {

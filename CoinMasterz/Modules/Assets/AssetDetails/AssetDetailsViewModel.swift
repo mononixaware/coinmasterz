@@ -15,12 +15,18 @@ final class AssetDetailsViewModel: ObservableObject {
     
     private weak var output: AssetDetailsViewOutput?
     private let coinCapProvider: CoinCapProvider
+    private let favoritesService: FavoritesService
     private var disposeBag = DisposeBag()
+    private var cancelBag = CancelBag()
     
     init(coinCapProvider: CoinCapProvider,
+         favoritesService: FavoritesService,
          model: AssetDetailsModel) {
         self.coinCapProvider = coinCapProvider
+        self.favoritesService = favoritesService
         self.model = model
+        
+        observeFavoriteStatus()
     }
     
     func selectPriceChartInterval(_ interval: AssetDetailsModel.PriceChart.Interval) { handlePriceChartIntervalSelection(interval) }
@@ -32,7 +38,10 @@ private extension AssetDetailsViewModel {
         coinCapProvider.getAsset(slug: assetID)
             .map(AssetDetailsModel.builder.makeDetails)
             .subscribe(on: MainScheduler.instance)
-            .weak(self) { $0.model.accept(details: $1) }
+            .weak(self) {
+                $0.model.accept(details: $1)
+                $0.output?.updateNavigation(title: $1.symbol)
+            }
             .traceError()
             .disposed(by: disposeBag)
     }
@@ -74,6 +83,21 @@ private extension AssetDetailsViewModel {
     }
 }
 
+private extension AssetDetailsViewModel {
+    
+    func observeFavoriteStatus() {
+        favoritesService.favoritesPublisher
+            .map { [weak self] favoriteIDs -> Bool in
+                self.flatMap({ favoriteIDs.contains($0.model.assetID) }).orJust(false)
+            }
+            .sink { [weak self] isFavorite in
+                self?.model.updateFavorite(status: isFavorite)
+                self?.output?.updateFavorite(status: isFavorite)
+            }
+            .store(in: &cancelBag)
+    }
+}
+
 extension AssetDetailsViewModel: AssetDetailsViewInput {
     
     func bind(output: any AssetDetailsViewOutput) {
@@ -83,5 +107,10 @@ extension AssetDetailsViewModel: AssetDetailsViewInput {
     func loadContets() {
         getDetails(assetID: model.assetID)
         getPriceChart(assetID: model.assetID)
+        output?.updateFavorite(status: model.isFavorite)
+    }
+    
+    func toggleFavorite() {
+        favoritesService.toggleFavorite(assetID: model.assetID)
     }
 }

@@ -17,3 +17,12 @@ public extension Collection {
         isEmpty ? nil : self
     }
 }
+
+// MARK: RandomAccessCollection
+
+public extension RandomAccessCollection where Self: MutableCollection {
+    
+    mutating func mutate(_ mutation: (inout Element) -> Void) {
+        indices.forEach { mutation(&self[$0]) }
+    }
+}

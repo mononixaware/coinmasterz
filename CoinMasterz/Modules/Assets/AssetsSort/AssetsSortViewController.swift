@@ -28,35 +28,30 @@ struct AssetsSortViewUI: View {
     }
     
     var body: some View {
-        ScrollView(.vertical) {
-            LazyVStack(spacing: 12.0) {
-                ForEach(viewModel.model.entities) { entity in
-                    Button {
-                        viewModel.select(kind: entity.kind)
-                    } label: {
-                        HStack(spacing: 0.0) {
-                            Text(entity.title)
-                                .font(.body)
+        List {
+            ForEach(viewModel.model.entities) { entity in
+                Button {
+                    viewModel.select(kind: entity.kind)
+                } label: {
+                    HStack(spacing: 0.0) {
+                        Text(entity.title)
+                            .font(.body)
+                            .foregroundStyle(Color(uiColor: .label))
+                            .lineLimit(1)
+                        
+                        Spacer(minLength: 0.0)
+                        
+                        if viewModel.model.selectedKind == entity.kind {
+                            Spacer(minLength: 24.0)
+                            
+                            Image(systemName: "checkmark")
+                                .font(.headline)
                                 .foregroundStyle(Color(uiColor: .label))
-                                .lineLimit(1)
-                            
-                            Spacer(minLength: 0.0)
-                            
-                            if viewModel.model.selectedKind == entity.kind {
-                                Spacer(minLength: 24.0)
-                                
-                                Image(systemName: "checkmark")
-                                    .font(.headline)
-                                    .foregroundStyle(Color(uiColor: .label))
-                            }
                         }
-                        .padding(.vertical, 8)
                     }
-                    
-                    Divider()
                 }
+                
             }
-            .padding(16)
         }
     }
 }
