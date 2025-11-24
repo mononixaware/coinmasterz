@@ -86,12 +86,17 @@ private extension AssetsViewUI {
                 } label: {
                     AssetEntityRow(entity: entity)
                 }
+                .contextMenu {
+                    Button(entity.isFavorite ? "Unfavorite" : "Favorite") {
+                        viewModel.toggleFavorite(entityID: entity.id)
+                    }
+                }
                 .swipeActions(edge: .leading) {
                     Button {
                         viewModel.toggleFavorite(entityID: entity.id)
                     } label: {
                         Label(
-                            entity.isFavorite ? "Delete" : "Favorite",
+                            entity.isFavorite ? "Unfavorite" : "Favorite",
                             systemImage: entity.isFavorite ? "star.fill" : "star"
                         )
                     }

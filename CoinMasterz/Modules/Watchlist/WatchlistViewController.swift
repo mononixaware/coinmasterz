@@ -62,6 +62,11 @@ private extension WatchlistViewUI {
                 } label: {
                     AssetEntityRow(entity: entity)
                 }
+                .contextMenu {
+                    Button("Delete") {
+                        viewModel.toggleFavorite(entityID: entity.id)
+                    }
+                }
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {
                         viewModel.toggleFavorite(entityID: entity.id)
