@@ -30,7 +30,7 @@ final class AssetDetailsViewController: BaseHostingController<AssetDetailsViewUI
     
     func updateFavorite(status: Bool) {
         favoriteButton?.image = UIImage(systemName: status ? "star.fill" : "star")
-        favoriteButton?.tintColor = status ? .yellow : .label
+        favoriteButton?.tintColor = status ? .systemOrange : .label
     }
 }
 

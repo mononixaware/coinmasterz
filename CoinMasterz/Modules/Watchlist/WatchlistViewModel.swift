@@ -46,6 +46,7 @@ private extension WatchlistViewModel {
         
         let ids = assetsIDs.joined(separator: ",")
         return coinCapProvider.getAssets(search: nil, ids: ids, limit: nil, offset: nil)
+            .map(\.data)
             .map(WatchlistModelBuilder.makeEntities)
             .onError(with: self) { $0.didFailToFetchEntities(error: $1) }
             .traceError()

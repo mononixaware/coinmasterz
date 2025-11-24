@@ -51,7 +51,7 @@ private extension AssetsViewModel {
         let offset = model.displayEntities.count
         
         return Single.zip(
-            coinCapProvider.getAssets(search: search, ids: nil, limit: limit, offset: offset),
+            coinCapProvider.getAssets(search: search, ids: nil, limit: limit, offset: offset).map(\.data),
             Single.just(favoritesService.getAllFavoriteIDs())
         )
         .map(AssetsModel.builder.makeEntities)

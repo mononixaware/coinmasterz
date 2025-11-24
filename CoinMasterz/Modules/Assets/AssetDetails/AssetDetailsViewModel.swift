@@ -41,6 +41,7 @@ private extension AssetDetailsViewModel {
     
     func getDetails(assetID: String) {
         coinCapProvider.getAsset(slug: assetID)
+            .map(\.data)
             .map(AssetDetailsModel.builder.makeDetails)
             .subscribe(on: MainScheduler.instance)
             .weak(self) { $0.didGet(details: $1) }
@@ -66,6 +67,7 @@ private extension AssetDetailsViewModel {
         let end = Date.now.milliseconds
         
         coinCapProvider.getAssetHistory(slug: assetID, interval: interval, start: start, end: end)
+            .map(\.data)
             .map(AssetDetailsModel.builder.makePriceChartData)
             .subscribe(on: MainScheduler.instance)
             .weak(self) { $0.didGet(priceChartData: $1) }

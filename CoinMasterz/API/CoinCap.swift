@@ -32,6 +32,18 @@ enum CoinCap {
         let date: String
     }
     
+    struct Response<T: Decodable>: Decodable {
+        
+        let timestamp: Int
+        let data: T
+    }
+    
+    struct ResponseArray<T: Decodable>: Decodable {
+        
+        let timestamp: Int
+        let data: [T]
+    }
+    
     // MARK: Codable
     
     enum AssetHistoryInterval: String, Codable {

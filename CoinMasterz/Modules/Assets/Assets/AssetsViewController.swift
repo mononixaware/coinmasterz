@@ -100,7 +100,7 @@ private extension AssetsViewUI {
                             systemImage: entity.isFavorite ? "star.fill" : "star"
                         )
                     }
-                    .tint(entity.isFavorite ? .yellow : .gray)
+                    .tint(entity.isFavorite ? .orange : .gray)
                 }
             }
             
