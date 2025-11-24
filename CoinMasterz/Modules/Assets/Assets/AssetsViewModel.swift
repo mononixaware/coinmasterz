@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import RxSwift
+import SwiftUI
 
 final class AssetsViewModel: ObservableObject {
     
@@ -62,14 +63,21 @@ private extension AssetsViewModel {
         
         fetchEntities()
             .subscribe(on: MainScheduler.instance)
-            .weak(self) {
-                if loadMore {
-                    $0.model.append(newEntities: $1)
-                } else {
-                    $0.model.accept(entities: $1)
-                }
-            }
+            .weak(self) { $0.didGet(entities: $1, loadMore: loadMore) }
             .disposed(by: disposeBag)
+    }
+}
+
+private extension AssetsViewModel {
+    
+    func didGet(entities: [AssetsModel.Entity], loadMore: Bool) {
+        withAnimation {
+            if loadMore {
+                model.append(newEntities: entities)
+            } else {
+                model.accept(entities: entities)
+            }
+        }
     }
 }
 
@@ -89,7 +97,7 @@ private extension AssetsViewModel {
     
     func handleRefresh() async {
         disposeBag = DisposeBag()
-        let entities = try? await fetchEntities().value
+        let entities = try? await fetchEntities().delay(.seconds(1), scheduler: MainScheduler.instance).value
         model.accept(entities: entities ?? [])
     }
 }
@@ -132,7 +140,9 @@ extension AssetsViewModel: AssetsViewInput {
     
     func selectSort() {
         output?.steps.send(.sortSelected(selected: model.sortKind, selectCompletion: { [weak self] sortKind in
-            self?.model.changeSortKind(to: sortKind)
+            withAnimation {
+                self?.model.changeSortKind(to: sortKind)
+            }
         }))
     }
 }

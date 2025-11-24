@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import RxSwift
+import SwiftUI
 
 final class WatchlistViewModel: ObservableObject {
     
@@ -47,13 +48,21 @@ private extension WatchlistViewModel {
             .traceError()
     }
     
-    func loadEntities() {
+    func getEntities() {
         let assetsIDs = Array(favoritesService.getAllFavoriteIDs())
-        
         fetchEntities(assetsIDs: assetsIDs)
             .subscribe(on: MainScheduler.instance)
-            .weak(self) { $0.model.accept(entities: $1) }
+            .weak(self) { $0.didGet(entities: $1) }
             .disposed(by: disposeBag)
+    }
+}
+
+private extension WatchlistViewModel {
+    
+    func didGet(entities: [WatchlistModel.Entity]) {
+        withAnimation {
+            model.accept(entities: entities)
+        }
     }
 }
 
@@ -62,7 +71,8 @@ private extension WatchlistViewModel {
     func handleRefresh() async {
         disposeBag = DisposeBag()
         let assetsIDs = Array(favoritesService.getAllFavoriteIDs())
-        let entities = try? await fetchEntities(assetsIDs: assetsIDs).value
+        let entitiesRequest = fetchEntities(assetsIDs: assetsIDs).delay(.seconds(1), scheduler: MainScheduler.instance)
+        let entities = try? await entitiesRequest.value
         model.accept(entities: entities ?? [])
     }
 }
@@ -74,7 +84,7 @@ private extension WatchlistViewModel {
             .dropFirst() // Ignore initial value
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.loadEntities()
+                self?.getEntities()
             }
             .store(in: &cancelBag)
     }
@@ -91,6 +101,6 @@ extension WatchlistViewModel: WatchlistViewInput {
         
         disposeBag = DisposeBag()
         model.reset()
-        loadEntities()
+        getEntities()
     }
 }

@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import RxSwift
+import SwiftUI
 
 final class AssetDetailsViewModel: ObservableObject {
     
@@ -42,10 +43,7 @@ private extension AssetDetailsViewModel {
         coinCapProvider.getAsset(slug: assetID)
             .map(AssetDetailsModel.builder.makeDetails)
             .subscribe(on: MainScheduler.instance)
-            .weak(self) {
-                $0.model.accept(details: $1)
-                $0.output?.updateNavigation(title: $1.symbol)
-            }
+            .weak(self) { $0.didGet(details: $1) }
             .traceError()
             .disposed(by: disposeBag)
     }
@@ -69,9 +67,25 @@ private extension AssetDetailsViewModel {
         coinCapProvider.getAssetHistory(slug: assetID, interval: interval, start: start, end: end)
             .map(AssetDetailsModel.builder.makePriceChartData)
             .subscribe(on: MainScheduler.instance)
-            .weak(self) { $0.model.acceptPriceChart(data: $1) }
+            .weak(self) { $0.didGet(priceChartData: $1) }
             .traceError()
             .disposed(by: disposeBag)
+    }
+}
+
+private extension AssetDetailsViewModel {
+    
+    func didGet(details: AssetDetailsModel.Details) {
+        output?.updateNavigation(title: details.symbol)
+        withAnimation {
+            model.accept(details: details)
+        }
+    }
+    
+    func didGet(priceChartData: AssetDetailsModel.PriceChart.Data) {
+        withAnimation {
+            model.acceptPriceChart(data: priceChartData)
+        }
     }
 }
 
