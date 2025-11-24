@@ -46,6 +46,18 @@ final class ModuleAssembly: Assembly {
             return view
         }
         
+        container.register(OnboardingView.self) { r, model in
+            let viewModel = OnboardingViewModel(
+                userDefaults: r.resolve(),
+                model: model
+            )
+            let viewUI = OnboardingViewUI(viewModel: viewModel)
+            let view = OnboardingViewController(rootView: viewUI)
+            viewModel.bind(output: view)
+            view.viewModel = viewModel
+            return view
+        }
+        
         container.register(WatchlistView.self) { r, model in
             let viewModel = WatchlistViewModel(
                 coinCapProvider: r.resolve(),

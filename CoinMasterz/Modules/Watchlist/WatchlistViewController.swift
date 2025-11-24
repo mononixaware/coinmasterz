@@ -26,7 +26,11 @@ final class WatchlistViewController: BaseHostingController<WatchlistViewUI>, Wat
 
 struct WatchlistViewUI: View {
     
-    @ObservedObject private(set) var viewModel: WatchlistViewModel
+    @ObservedObject private var viewModel: WatchlistViewModel
+    
+    init(viewModel: WatchlistViewModel) {
+        self.viewModel = viewModel
+    }
     
     var body: some View {
         Group {

@@ -21,5 +21,10 @@ final class ServiceAssembly: Assembly {
             return DefaultFavoritesService(persistentContainer: appDelegate.persistentContainer)
         }
         .inObjectScope(.container)
+        
+        container.register(UserDefaultsService.self) { r in
+            DefaultUserDefaultsService()
+        }
+        .inObjectScope(.container)
     }
 }

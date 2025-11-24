@@ -11,7 +11,7 @@ final class FlowAssembly: Assembly {
     
     func assemble(container: Container) {
         container.register(AppFlow.self) { r, window, navigationController in
-            DefaultAppFlow(r: r, window: window, controller: navigationController)
+            DefaultAppFlow(r: r, window: window, controller: navigationController, userDefaultsService: r.resolve())
         }
         .inObjectScope(.weak)
         
