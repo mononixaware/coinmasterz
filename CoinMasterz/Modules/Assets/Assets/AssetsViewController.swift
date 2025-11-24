@@ -79,7 +79,7 @@ private extension AssetsViewUI {
                 Button {
                     viewModel.select(entity: entity)
                 } label: {
-                    AssetsViewComponents.Entity(entity: entity)
+                    AssetEntityRow(entity: entity)
                 }
                 .swipeActions(edge: .leading) {
                     Button {

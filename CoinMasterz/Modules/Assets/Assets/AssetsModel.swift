@@ -44,9 +44,9 @@ struct AssetsModel {
         let initials: String
         let symbol: String
         let name: String
-        let price: Double
+        let priceValue: Double
         let priceDisplayValue: String
-        let changePercentDynamics: Dynamics
+        let changeDynamics: Dynamics
         let marketCap: Double
         private(set) var isFavorite: Bool
         
@@ -74,8 +74,8 @@ extension AssetsModel {
         case .marketCapAscending: entities.sorted(by: \.marketCap, <)
         case .priceDescending: entities.sorted(by: \.price, >)
         case .priceAscending: entities.sorted(by: \.price, <)
-        case .changePercentDescending: entities.sorted(by: \.changePercentDynamics.value, >)
-        case .changePercentAscending: entities.sorted(by: \.changePercentDynamics.value, <)
+        case .changePercentDescending: entities.sorted(by: \.changeDynamics.value, >)
+        case .changePercentAscending: entities.sorted(by: \.changeDynamics.value, <)
         }
     }
 }
@@ -130,6 +130,21 @@ extension AssetsModel {
 
 // MARK: Entity
 
+extension AssetsModel.Entity: AssetEntityRepresentable {
+    
+    var price: String {
+        priceDisplayValue
+    }
+    
+    var change: String {
+        changeDynamics.displayValue
+    }
+    
+    var changeColor: Color {
+        changeDynamics.color
+    }
+}
+
 extension AssetsModel.Entity {
     
     mutating func update(favoriteStatus: Bool) {
@@ -161,7 +176,11 @@ enum AssetsModelBuilder {
             let initials = String(asset.name.initials.prefix(2))
             let price = Double(asset.priceUsd).orZero
             let priceDisplayValue = NumberFormatter.priceFormat(price)
-            let changePercentDynamics = asset.changePercent24Hr.flatMap(makeEntityDynamics).orJust(.zero)
+            let changeDynamics = AssetsModel.Entity.Dynamics(
+                value: asset.changePercent24Hr.flatMap({ Double($0) }).orZero,
+                displayValue: asset.relativeChangeDisplayValue,
+                color: asset.changeColor
+            )
             let marketCap = Double(asset.marketCapUsd).orZero
             let isFavorite = favoriteIDs.contains(asset.id)
             
@@ -170,28 +189,12 @@ enum AssetsModelBuilder {
                 initials: initials,
                 symbol: asset.symbol,
                 name: asset.name,
-                price: price,
+                priceValue: price,
                 priceDisplayValue: priceDisplayValue,
-                changePercentDynamics: changePercentDynamics,
+                changeDynamics: changeDynamics,
                 marketCap: marketCap,
                 isFavorite: isFavorite
             )
         }
-    }
-    
-    static func makeEntityDynamics(value: String) -> AssetsModel.Entity.Dynamics {
-        guard let value = Double(value) else { return .zero }
-        
-        let color: Color = switch value {
-        case ..<0: .red
-        case 0: Color(uiColor: .secondaryLabel)
-        default: .green
-        }
-        
-        return AssetsModel.Entity.Dynamics(
-            value: value,
-            displayValue: value.format2.appending("%"),
-            color: color
-        )
     }
 }

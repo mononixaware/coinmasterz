@@ -51,7 +51,7 @@ private extension WatchlistViewUI {
                 Button {
                     viewModel.select(entity: entity)
                 } label: {
-                    WatchlistViewComponents.Entity(entity: entity)
+                    AssetEntityRow(entity: entity)
                 }
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {

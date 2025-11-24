@@ -16,7 +16,7 @@ extension AssetDetailsModel {
         let name: String
         let rank: String
         let price: String
-        let changeValue: String
+        let change: String
         let changeColor: Color
         let marketCap: String
         let supply: String
@@ -34,20 +34,6 @@ extension AssetDetailsModelBuilder {
         let initials = String(asset.name.initials.prefix(2))
         let rank = asset.rank.flatMap({ "#" + $0 }).orEmpty
         let price = NumberFormatter.priceFormat(Double(asset.priceUsd).orZero)
-        let changeValue = asset.changePercent24Hr
-            .flatMap { Double($0) }
-            .flatMap { $0.format2.appending("%") }
-            .orJust("0.00%")
-        let changeColor = asset.changePercent24Hr
-            .flatMap { Double($0) }
-            .flatMap {
-                switch $0 {
-                case ..<0: Color.red
-                case 0: Color(uiColor: .secondaryLabel)
-                default: Color.green
-                }
-            }
-            .orJust(Color(uiColor: .secondaryLabel))
         let marketCap = NumberFormatter.bigNumberFormat(Double(asset.marketCapUsd).orZero).appending(" USD")
         let supply = NumberFormatter.bigNumberFormat(Double(asset.supply).orZero)
         let maxSupply = asset.maxSupply.flatMap { NumberFormatter.bigNumberFormat(Double($0).orZero) }
@@ -60,8 +46,8 @@ extension AssetDetailsModelBuilder {
             name: asset.name,
             rank: rank,
             price: price,
-            changeValue: changeValue,
-            changeColor: changeColor,
+            change: asset.relativeChangeDisplayValue,
+            changeColor: asset.changeColor,
             marketCap: marketCap,
             supply: supply,
             maxSupply: maxSupply,

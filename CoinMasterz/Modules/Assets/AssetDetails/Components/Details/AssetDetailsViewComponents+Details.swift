@@ -41,7 +41,7 @@ extension AssetDetailsViewComponents {
                     }
                     
                     HStack(alignment: .top, spacing: 8.0) {
-                        Text(details.changeValue)
+                        Text(details.change)
                             .font(.body)
                             .foregroundStyle(details.changeColor)
                         
