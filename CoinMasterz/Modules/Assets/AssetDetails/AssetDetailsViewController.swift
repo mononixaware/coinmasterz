@@ -61,6 +61,22 @@ struct AssetDetailsViewUI: View {
     }
     
     var body: some View {
+        Group {
+            switch viewModel.model.context {
+            case .loading:
+                ProgressView("Loading details...")
+            case .loaded:
+                detailsContent
+            case .empty:
+                emptyStateView
+            }
+        }
+    }
+}
+
+private extension AssetDetailsViewUI {
+    
+    var detailsContent: some View {
         ScrollView(.vertical) {
             VStack {
                 if let details = viewModel.model.details {
@@ -70,10 +86,23 @@ struct AssetDetailsViewUI: View {
                 
                 AssetDetailsViewComponents.PriceChart(
                     priceChart: viewModel.model.priceChart,
-                    intervalSelectAction: viewModel.selectPriceChartInterval
+                    intervalSelectAction: viewModel.selectPriceChartInterval,
+                    reloadSelectAction: viewModel.reloadPriceChart
                 )
-                .frame(height: 360)
             }
+        }
+    }
+    
+    private var emptyStateView: some View {
+        ContentUnavailableView {
+            Label("No Details Found", systemImage: "magnifyingglass")
+        } description: {
+                Text("Unable to load cryptocurrency details.")
+        } actions: {
+            Button("Retry") {
+                viewModel.reload()
+            }
+            .buttonStyle(.bordered)
         }
     }
 }

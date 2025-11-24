@@ -125,6 +125,7 @@ extension AssetsViewModel: AssetsViewInput {
     func loadContets() {
         guard model.context != .loaded else { return }
         
+        disposeBag = DisposeBag()
         model.reset()
         getEntities(loadMore: false)
     }

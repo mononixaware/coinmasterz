@@ -89,6 +89,7 @@ extension WatchlistViewModel: WatchlistViewInput {
     func loadContets() {
         guard model.context != .loaded else { return }
         
+        disposeBag = DisposeBag()
         model.reset()
         loadEntities()
     }

@@ -30,6 +30,10 @@ final class AssetDetailsViewModel: ObservableObject {
     }
     
     func selectPriceChartInterval(_ interval: AssetDetailsModel.PriceChart.Interval) { handlePriceChartIntervalSelection(interval) }
+    
+    func reloadPriceChart() { handleReloadPriceChart() }
+    
+    func reload() { loadContets() }
 }
 
 private extension AssetDetailsViewModel {
@@ -80,6 +84,17 @@ private extension AssetDetailsViewModel {
         model.selectPriceChart(interval: interval)
         model.changePriceChartContext(to: .loading)
         getPriceChart(assetID: model.assetID)
+    }
+    
+    func handleReloadPriceChart() {
+        model.changePriceChartContext(to: .loading)
+        getPriceChart(assetID: model.assetID)
+    }
+    
+    func handleReload() {
+        disposeBag = DisposeBag()
+        model.reset()
+        loadContets()
     }
 }
 

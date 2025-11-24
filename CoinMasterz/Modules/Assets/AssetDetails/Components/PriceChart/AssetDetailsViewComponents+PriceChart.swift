@@ -16,25 +16,58 @@ extension AssetDetailsViewComponents {
         
         let priceChart: AssetDetailsModel.PriceChart
         let intervalSelectAction: Callback<AssetDetailsModel.PriceChart.Interval>
+        let reloadSelectAction: EmptyCallback?
         
         var body: some View {
-            VStack(alignment: .leading, spacing: 16.0) {
-                if let data = priceChart.data {
-                    VStack(spacing: 12.0) {
-                        ChartComponent(data: data)
-                        
-                        IntervalSelection(
-                            intervals: priceChart.intervals,
-                            selectedInterval: priceChart.selectedInterval,
-                            selectAction: intervalSelectAction
-                        )
-                        .padding(.horizontal, 64)
+            ZStack {
+                switch priceChart.context {
+                case .loading, .loaded:
+                    chartContents
+                    
+                    if priceChart.data.isNone {
+                        ProgressView("Loading chart...")
                     }
-                
-                Metrics(metrics: data.metrics)
-                    .padding(.horizontal, 16)
+                case .empty:
+                    emptyStateView
                 }
             }
+            .frame(height: 360)
+        }
+    }
+}
+
+private extension AssetDetailsViewComponents.PriceChart {
+    
+    var chartContents: some View {
+        VStack(alignment: .leading, spacing: 16.0) {
+            if let data = priceChart.data {
+                VStack(spacing: 12.0) {
+                    AssetDetailsViewComponents.ChartComponent(data: data)
+                    
+                    AssetDetailsViewComponents.IntervalSelection(
+                        intervals: priceChart.intervals,
+                        selectedInterval: priceChart.selectedInterval,
+                        selectAction: intervalSelectAction
+                    )
+                    .padding(.horizontal, 64)
+                }
+                
+                AssetDetailsViewComponents.Metrics(metrics: data.metrics)
+                    .padding(.horizontal, 16)
+            }
+        }
+    }
+    
+    private var emptyStateView: some View {
+        ContentUnavailableView {
+            Label("No Price History Found", systemImage: "magnifyingglass")
+        } description: {
+                Text("Unable to load price chart.")
+        } actions: {
+            Button("Retry") {
+                reloadSelectAction?()
+            }
+            .buttonStyle(.bordered)
         }
     }
 }

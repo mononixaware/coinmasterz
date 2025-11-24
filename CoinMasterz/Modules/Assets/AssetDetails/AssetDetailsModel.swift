@@ -9,15 +9,18 @@ struct AssetDetailsModel {
     
     let assetID: String
     private(set) var isFavorite: Bool
+    private(set) var context: Context
     private(set) var details: Details?
     private(set) var priceChart: PriceChart
     
     init(assetID: String,
          isFavorite: Bool = false,
+         context: Context = .loading,
          details: Details? = nil,
          priceChart: PriceChart = .initial) {
         self.assetID = assetID
         self.isFavorite = isFavorite
+        self.context = context
         self.details = details
         self.priceChart = priceChart
     }
@@ -41,8 +44,13 @@ extension AssetDetailsModel {
         self.isFavorite = status
     }
     
+    mutating func changeContext(to state: Context) {
+        self.context = state
+    }
+    
     mutating func accept(details: Details?) {
         self.details = details
+        self.changeContext(to: details.isSome ? .loaded : .loading)
     }
     
     mutating func changePriceChartContext(to state: Context) {
@@ -55,6 +63,10 @@ extension AssetDetailsModel {
     
     mutating func selectPriceChart(interval: PriceChart.Interval) {
         priceChart.select(interval: interval)
+    }
+    
+    mutating func reset() {
+        self = Self.init(assetID: assetID)
     }
 }
 
