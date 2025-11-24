@@ -19,8 +19,8 @@ final class AssetsViewController: BaseHostingController<AssetsViewUI>, AssetsVie
         setupNavigationBarButtons()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewDidLoad() {
+        super.viewDidLoad()
         viewModel.loadContets()
     }
 }
@@ -52,13 +52,18 @@ struct AssetsViewUI: View {
     
     var body: some View {
         Group {
-            switch viewModel.model.context {
+            switch viewModel.model.state {
             case .loading:
                 ProgressView("Loading assets...")
             case .loaded:
                 assetsListContent
             case .empty:
                 emptyStateView
+            case let .failed(error):
+                ViewStateFailureView(
+                    error: error,
+                    retrySelectAction: viewModel.retry
+                )
             }
         }
         .searchable(
@@ -94,9 +99,9 @@ private extension AssetsViewUI {
                 }
             }
             
-            if viewModel.model.context == .loaded && viewModel.model.loadMoreContext == .loaded {
+            if viewModel.model.state.isLoaded && viewModel.model.loadMoreState.isLoaded {
                 ProgressView()
-                    .opacity(viewModel.model.loadMoreContext == .loading ? 1.0 : 0.0)
+                    .opacity(viewModel.model.loadMoreState.isLoading ? 1.0 : 0.0)
                     .padding()
                     .onAppear {
                         viewModel.getMoreAssets()

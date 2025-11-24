@@ -9,26 +9,20 @@ import SwiftUI
 
 struct AssetsModel {
     
-    private(set) var context: Context
-    private(set) var loadMoreContext: Context
+    private(set) var state: State
+    private(set) var loadMoreState: State
     private(set) var sortKind: SortKind
-    private var entities: [Entity]
     
-    init(context: Context = .loading,
-         loadMoreContext: Context = .loaded,
+    init(state: State = .loading,
+         loadMoreState: State = .loaded([]),
          sortKind: SortKind = .default,
-         entities: [Entity] = [],
          searchQuery: String = .empty) {
-        self.context = context
-        self.loadMoreContext = loadMoreContext
+        self.state = state
+        self.loadMoreState = loadMoreState
         self.sortKind = sortKind
-        self.entities = entities
     }
     
-    enum Context {
-        
-        case loading, loaded, empty
-    }
+    typealias State = ViewState<[Entity], AppErrorType>
     
     enum SortKind {
         
@@ -67,6 +61,10 @@ extension AssetsModel {
     
     static let defaultEntitiesCount = 64
     
+    var entities: [Entity] {
+        state.content ?? []
+    }
+    
     var displayEntities: [Entity] {
         switch sortKind {
         case .default: entities
@@ -82,12 +80,12 @@ extension AssetsModel {
 
 extension AssetsModel {
     
-    mutating func changeContext(to state: Context) {
-        self.context = state
+    mutating func changeState(to newState: State) {
+        self.state = newState
     }
     
-    mutating func changeLoadMoreContext(to state: Context) {
-        self.loadMoreContext = state
+    mutating func changeLoadMoreState(to newState: State) {
+        self.loadMoreState = newState
     }
     
     mutating func changeSortKind(to kind: SortKind) {
@@ -95,25 +93,42 @@ extension AssetsModel {
     }
     
     mutating func accept(entities: [Entity]) {
-        self.entities = entities
-        changeContext(to: entities.isEmpty ? .empty : .loaded)
-    }
-    
-    mutating func append(newEntities: [Entity]) {
-        self.entities.append(contentsOf: newEntities)
-        changeLoadMoreContext(to: newEntities.count < Self.defaultEntitiesCount ? .empty : .loaded)
-    }
-    
-    mutating func updateEntities(favoriteIDs: Set<String>) {
-        entities.mutate { entity in
-            let isFavorite = favoriteIDs.contains(entity.id)
-            entity.update(favoriteStatus: isFavorite)
+        if entities.isEmpty {
+            self.state = .empty
+        } else {
+            self.state = .loaded(entities)
         }
     }
     
+    mutating func append(newEntities: [Entity]) {
+        let currentEntities = self.entities
+        let updatedEntities = currentEntities + newEntities
+        self.state = .loaded(updatedEntities)
+        
+        if newEntities.count < Self.defaultEntitiesCount {
+            self.loadMoreState = .empty
+        } else {
+            self.loadMoreState = .loaded([])
+        }
+    }
+    
+    mutating func updateEntities(favoriteIDs: Set<String>) {
+        guard case var .loaded(currentEntities) = state else { return }
+        
+        currentEntities.mutate { entity in
+            let isFavorite = favoriteIDs.contains(entity.id)
+            entity.update(favoriteStatus: isFavorite)
+        }
+        
+        self.state = .loaded(currentEntities)
+    }
+    
     mutating func toggleEntityFavoriteStatus(entityID: String) {
-        if let index = entities.firstIndex(where: { $0.id == entityID }) {
-            entities[index].toggleFavoriteStatus()
+        guard case var .loaded(currentEntities) = state else { return }
+        
+        if let index = currentEntities.firstIndex(where: { $0.id == entityID }) {
+            currentEntities[index].toggleFavoriteStatus()
+            self.state = .loaded(currentEntities)
         }
     }
     
@@ -122,9 +137,8 @@ extension AssetsModel {
     }
     
     mutating func resetForSearch() {
-        self.entities = []
-        self.context = .loading
-        self.loadMoreContext = .loaded
+        self.state = .loading
+        self.loadMoreState = .loaded([])
     }
 }
 

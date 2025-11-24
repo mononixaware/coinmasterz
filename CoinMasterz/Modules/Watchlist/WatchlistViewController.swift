@@ -18,8 +18,8 @@ final class WatchlistViewController: BaseHostingController<WatchlistViewUI>, Wat
         navigationItem.title = "Watchlist"
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewDidLoad() {
+        super.viewDidLoad()
         viewModel.loadContets()
     }
 }
@@ -34,13 +34,18 @@ struct WatchlistViewUI: View {
     
     var body: some View {
         Group {
-            switch viewModel.model.context {
+            switch viewModel.model.state {
             case .loading:
                 ProgressView("Loading favorites...")
             case .loaded:
                 watchlistContent
             case .empty:
                 emptyStateView
+            case let .failed(error):
+                ViewStateFailureView(
+                    error: error,
+                    retrySelectAction: viewModel.retry
+                )
             }
         }
         .refreshable(action: viewModel.refresh)

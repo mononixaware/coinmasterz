@@ -16,11 +16,11 @@ extension AssetDetailsViewComponents {
         
         let priceChart: AssetDetailsModel.PriceChart
         let intervalSelectAction: Callback<AssetDetailsModel.PriceChart.Interval>
-        let reloadSelectAction: EmptyCallback?
+        let retrySelectAction: EmptyCallback?
         
         var body: some View {
             ZStack {
-                switch priceChart.context {
+                switch priceChart.state {
                 case .loading, .loaded:
                     chartContents
                     
@@ -29,6 +29,11 @@ extension AssetDetailsViewComponents {
                     }
                 case .empty:
                     emptyStateView
+                case let .failed(error):
+                    ViewStateFailureView(
+                        error: error,
+                        retrySelectAction: retrySelectAction
+                    )
                 }
             }
             .frame(height: 360)
@@ -65,7 +70,7 @@ private extension AssetDetailsViewComponents.PriceChart {
                 Text("Unable to load price chart.")
         } actions: {
             Button("Retry") {
-                reloadSelectAction?()
+                retrySelectAction?()
             }
             .buttonStyle(.bordered)
         }
@@ -167,17 +172,45 @@ private extension AssetDetailsViewComponents {
     
     struct IntervalSelection: View {
         
+        @State private var localSelection: AssetDetailsModel.PriceChart.Interval?
+        @State private var debounceTask: Task<Void, Never>?
+        
         let intervals: [AssetDetailsModel.PriceChart.Interval]
         let selectedInterval: AssetDetailsModel.PriceChart.Interval
         let selectAction: Callback<AssetDetailsModel.PriceChart.Interval>?
         
+        private let debounceDuration: Duration = .milliseconds(600)
+
         var body: some View {
-            Picker("Interval", selection: Binding(get: { selectedInterval }, set: { selectAction?($0) })) {
+            Picker("Interval", selection: Binding(
+                get: { localSelection ?? selectedInterval },
+                set: { newValue in
+                    localSelection = newValue
+                    
+                    // Cancel previous debounce task
+                    debounceTask?.cancel()
+                    
+                    // Create new debounce task
+                    debounceTask = Task {
+                        try? await Task.sleep(for: debounceDuration)
+                        
+                        guard Task.isCancelled.isFalse else { return }
+                        
+                        selectAction?(newValue)
+                    }
+                }
+            )) {
                 ForEach(intervals) { interval in
                     Text(interval.title).tag(interval)
                 }
             }
             .pickerStyle(.segmented)
+            .onAppear {
+                localSelection = selectedInterval
+            }
+            .onChange(of: selectedInterval) { _, newValue in
+                localSelection = newValue
+            }
         }
     }
     

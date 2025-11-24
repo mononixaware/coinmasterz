@@ -9,26 +9,20 @@ struct AssetDetailsModel {
     
     let assetID: String
     private(set) var isFavorite: Bool
-    private(set) var context: Context
-    private(set) var details: Details?
+    private(set) var state: State
     private(set) var priceChart: PriceChart
     
     init(assetID: String,
          isFavorite: Bool = false,
-         context: Context = .loading,
-         details: Details? = nil,
+         state: State = .loading,
          priceChart: PriceChart = .initial) {
         self.assetID = assetID
         self.isFavorite = isFavorite
-        self.context = context
-        self.details = details
+        self.state = state
         self.priceChart = priceChart
     }
     
-    enum Context {
-        
-        case loading, loaded, empty
-    }
+    typealias State = ViewState<Details, AppErrorType>
 }
 
 // MARK: Extensions
@@ -36,6 +30,10 @@ struct AssetDetailsModel {
 extension AssetDetailsModel {
     
     static let builder = AssetDetailsModelBuilder.self
+    
+    var details: Details? {
+        state.content
+    }
 }
 
 extension AssetDetailsModel {
@@ -44,17 +42,20 @@ extension AssetDetailsModel {
         self.isFavorite = status
     }
     
-    mutating func changeContext(to state: Context) {
-        self.context = state
+    mutating func changeState(to newState: State) {
+        self.state = newState
     }
     
     mutating func accept(details: Details?) {
-        self.details = details
-        self.changeContext(to: details.isSome ? .loaded : .loading)
+        if let details {
+            self.state = .loaded(details)
+        } else {
+            self.state = .empty
+        }
     }
     
-    mutating func changePriceChartContext(to state: Context) {
-        priceChart.changeContext(to: state)
+    mutating func changePriceChartState(to newState: PriceChart.State) {
+        priceChart.changeState(to: newState)
     }
     
     mutating func acceptPriceChart(data: PriceChart.Data?) {

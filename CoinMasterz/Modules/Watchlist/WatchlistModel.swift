@@ -9,19 +9,13 @@ import SwiftUI
 
 struct WatchlistModel {
     
-    private(set) var context: Context
-    private(set) var entities: [Entity]
+    private(set) var state: State
     
-    init(context: Context = .loading,
-         entities: [Entity] = []) {
-        self.context = context
-        self.entities = entities
+    init(state: State = .loading) {
+        self.state = state
     }
     
-    enum Context {
-        
-        case loading, loaded, empty
-    }
+    typealias State = ViewState<[Entity], AppErrorType>
     
     struct Entity: Identifiable, AssetEntityRepresentable {
         
@@ -39,13 +33,23 @@ struct WatchlistModel {
 
 extension WatchlistModel {
     
-    mutating func changeContext(to state: Context) {
-        self.context = state
+    var entities: [Entity] {
+        state.content.orEmpty
+    }
+}
+
+extension WatchlistModel {
+    
+    mutating func changeState(to newState: State) {
+        self.state = newState
     }
     
     mutating func accept(entities: [Entity]) {
-        self.entities = entities
-        changeContext(to: entities.isEmpty ? .empty : .loaded)
+        if entities.isEmpty {
+            self.state = .empty
+        } else {
+            self.state = .loaded(entities)
+        }
     }
     
     mutating func reset() {

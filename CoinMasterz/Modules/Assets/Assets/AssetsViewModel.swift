@@ -39,6 +39,8 @@ final class AssetsViewModel: ObservableObject {
     func getMoreAssets() { handleGetMoreAssets() }
     
     func refresh() async { await handleRefresh() }
+    
+    func retry() { handleRetry() }
 }
 
 private extension AssetsViewModel {
@@ -53,12 +55,13 @@ private extension AssetsViewModel {
             Single.just(favoritesService.getAllFavoriteIDs())
         )
         .map(AssetsModel.builder.makeEntities)
+        .onError(with: self) { $0.didFailToFetchEntities(error: $1) }
         .traceError()
     }
     
     func getEntities(loadMore: Bool) {
         if loadMore {
-            model.changeLoadMoreContext(to: .loading)
+            model.changeLoadMoreState(to: .loading)
         }
         
         fetchEntities()
@@ -79,12 +82,18 @@ private extension AssetsViewModel {
             }
         }
     }
+    
+    func didFailToFetchEntities(error: Error) {
+        withAnimation {
+            model.changeState(to: .failed(error.asAppError))
+        }
+    }
 }
 
 private extension AssetsViewModel {
     
     func handleGetMoreAssets() {
-        guard model.context == .loaded && model.loadMoreContext == .loaded else { return }
+        guard model.state.isLoaded && model.loadMoreState.isLoaded else { return }
         
         getEntities(loadMore: true)
     }
@@ -97,8 +106,17 @@ private extension AssetsViewModel {
     
     func handleRefresh() async {
         disposeBag = DisposeBag()
-        let entities = try? await fetchEntities().delay(.seconds(1), scheduler: MainScheduler.instance).value
-        model.accept(entities: entities ?? [])
+        let entitiesRequest = fetchEntities().delay(.seconds(1), scheduler: MainScheduler.instance)
+        guard let entities = try? await entitiesRequest.value else { return }
+        
+        model.accept(entities: entities)
+    }
+    
+    func handleRetry() {
+        withAnimation {
+            model.changeState(to: .loading)
+        }
+        loadContets()
     }
 }
 
@@ -131,7 +149,7 @@ extension AssetsViewModel: AssetsViewInput {
     }
     
     func loadContets() {
-        guard model.context != .loaded else { return }
+        guard model.state.isLoaded.isFalse else { return }
         
         disposeBag = DisposeBag()
         model.reset()

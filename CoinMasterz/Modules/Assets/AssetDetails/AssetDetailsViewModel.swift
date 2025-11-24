@@ -32,9 +32,9 @@ final class AssetDetailsViewModel: ObservableObject {
     
     func selectPriceChartInterval(_ interval: AssetDetailsModel.PriceChart.Interval) { handlePriceChartIntervalSelection(interval) }
     
-    func reloadPriceChart() { handleReloadPriceChart() }
+    func retryPriceChart() { handleRetryPriceChart() }
     
-    func reload() { loadContets() }
+    func retry() { handleRetry() }
 }
 
 private extension AssetDetailsViewModel {
@@ -44,6 +44,7 @@ private extension AssetDetailsViewModel {
             .map(AssetDetailsModel.builder.makeDetails)
             .subscribe(on: MainScheduler.instance)
             .weak(self) { $0.didGet(details: $1) }
+            .onError(with: self) { $0.didFailToGethDetails(error: $1) }
             .traceError()
             .disposed(by: disposeBag)
     }
@@ -68,6 +69,7 @@ private extension AssetDetailsViewModel {
             .map(AssetDetailsModel.builder.makePriceChartData)
             .subscribe(on: MainScheduler.instance)
             .weak(self) { $0.didGet(priceChartData: $1) }
+            .onError(with: self) { $0.didFailToGetPriceChartData(error: $1) }
             .traceError()
             .disposed(by: disposeBag)
     }
@@ -80,6 +82,13 @@ private extension AssetDetailsViewModel {
         withAnimation {
             model.accept(details: details)
         }
+        getPriceChart(assetID: model.assetID)
+    }
+    
+    func didFailToGethDetails(error: Error) {
+        withAnimation {
+            model.changeState(to: .failed(error.asAppError))
+        }
     }
     
     func didGet(priceChartData: AssetDetailsModel.PriceChart.Data) {
@@ -87,27 +96,36 @@ private extension AssetDetailsViewModel {
             model.acceptPriceChart(data: priceChartData)
         }
     }
+    
+    func didFailToGetPriceChartData(error: Error) {
+        withAnimation {
+            model.changePriceChartState(to: .failed(error.asAppError))
+        }
+    }
 }
 
 private extension AssetDetailsViewModel {
     
     func handlePriceChartIntervalSelection(_ interval: AssetDetailsModel.PriceChart.Interval) {
-        guard model.priceChart.selectedInterval.kind != interval.kind else { return }
+        guard model.state.isLoaded,
+              model.priceChart.selectedInterval.kind != interval.kind else { return }
         
         disposeBag = DisposeBag()
         model.selectPriceChart(interval: interval)
-        model.changePriceChartContext(to: .loading)
         getPriceChart(assetID: model.assetID)
     }
     
-    func handleReloadPriceChart() {
-        model.changePriceChartContext(to: .loading)
+    func handleRetryPriceChart() {
+        withAnimation {
+            model.changePriceChartState(to: .loading)
+        }
         getPriceChart(assetID: model.assetID)
     }
     
-    func handleReload() {
-        disposeBag = DisposeBag()
-        model.reset()
+    func handleRetry() {
+        withAnimation {
+            model.changeState(to: .loading)
+        }
         loadContets()
     }
 }
@@ -135,7 +153,6 @@ extension AssetDetailsViewModel: AssetDetailsViewInput {
     
     func loadContets() {
         getDetails(assetID: model.assetID)
-        getPriceChart(assetID: model.assetID)
         output?.updateFavorite(status: model.isFavorite)
     }
     

@@ -62,13 +62,18 @@ struct AssetDetailsViewUI: View {
     
     var body: some View {
         Group {
-            switch viewModel.model.context {
+            switch viewModel.model.state {
             case .loading:
                 ProgressView("Loading details...")
             case .loaded:
                 detailsContent
             case .empty:
                 emptyStateView
+            case let .failed(error):
+                ViewStateFailureView(
+                    error: error,
+                    retrySelectAction: viewModel.retry
+                )
             }
         }
     }
@@ -87,7 +92,7 @@ private extension AssetDetailsViewUI {
                 AssetDetailsViewComponents.PriceChart(
                     priceChart: viewModel.model.priceChart,
                     intervalSelectAction: viewModel.selectPriceChartInterval,
-                    reloadSelectAction: viewModel.reloadPriceChart
+                    retrySelectAction: viewModel.retryPriceChart
                 )
             }
         }
@@ -100,7 +105,7 @@ private extension AssetDetailsViewUI {
                 Text("Unable to load cryptocurrency details.")
         } actions: {
             Button("Retry") {
-                viewModel.reload()
+                viewModel.retry()
             }
             .buttonStyle(.bordered)
         }

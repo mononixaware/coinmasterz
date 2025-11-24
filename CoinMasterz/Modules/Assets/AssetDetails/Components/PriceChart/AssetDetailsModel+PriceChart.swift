@@ -11,10 +11,11 @@ extension AssetDetailsModel {
     
     struct PriceChart {
         
-        private(set) var context: Context
-        private(set) var data: Data?
+        private(set) var state: State
         private(set) var selectedInterval: Interval
         let intervals: [Interval]
+        
+        typealias State = ViewState<Data, AppErrorType>
         
         struct Data {
             
@@ -61,22 +62,28 @@ extension AssetDetailsModel {
 extension AssetDetailsModel.PriceChart {
     
     static let initial = Self.init(
-        context: .loading,
-        data: nil,
+        state: .loading,
         selectedInterval: .oneDay,
         intervals: AssetDetailsModel.builder.makeInitialIntervals()
     )
+    
+    var data: Data? {
+        state.content
+    }
 }
 
 extension AssetDetailsModel.PriceChart {
     
-    mutating func changeContext(to state: AssetDetailsModel.Context) {
-        self.context = state
+    mutating func changeState(to newState: State) {
+        self.state = newState
     }
     
     mutating func accept(data: Data?) {
-        self.data = data
-        changeContext(to: data.flatMap(\.prices.isEmpty).orJust(true) ? .empty : .loaded)
+        if let data {
+            self.state = .loaded(data)
+        } else {
+            self.state = .empty
+        }
     }
     
     mutating func select(interval: Interval) {

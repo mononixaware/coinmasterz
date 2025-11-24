@@ -35,6 +35,8 @@ final class WatchlistViewModel: ObservableObject {
     func toggleFavorite(entityID: String) { favoritesService.toggleFavorite(assetID: entityID) }
     
     func refresh() async { await handleRefresh() }
+    
+    func retry() { handleRetry() }
 }
 
 private extension WatchlistViewModel {
@@ -45,6 +47,7 @@ private extension WatchlistViewModel {
         let ids = assetsIDs.joined(separator: ",")
         return coinCapProvider.getAssets(search: nil, ids: ids, limit: nil, offset: nil)
             .map(WatchlistModelBuilder.makeEntities)
+            .onError(with: self) { $0.didFailToFetchEntities(error: $1) }
             .traceError()
     }
     
@@ -64,6 +67,12 @@ private extension WatchlistViewModel {
             model.accept(entities: entities)
         }
     }
+    
+    func didFailToFetchEntities(error: Error) {
+        withAnimation {
+            model.changeState(to: .failed(error.asAppError))
+        }
+    }
 }
 
 private extension WatchlistViewModel {
@@ -72,8 +81,16 @@ private extension WatchlistViewModel {
         disposeBag = DisposeBag()
         let assetsIDs = Array(favoritesService.getAllFavoriteIDs())
         let entitiesRequest = fetchEntities(assetsIDs: assetsIDs).delay(.seconds(1), scheduler: MainScheduler.instance)
-        let entities = try? await entitiesRequest.value
-        model.accept(entities: entities ?? [])
+        guard let entities = try? await entitiesRequest.value else { return }
+        
+        model.accept(entities: entities)
+    }
+    
+    func handleRetry() {
+        withAnimation {
+            model.changeState(to: .loading)
+        }
+        loadContets()
     }
 }
 
@@ -97,7 +114,7 @@ extension WatchlistViewModel: WatchlistViewInput {
     }
     
     func loadContets() {
-        guard model.context != .loaded else { return }
+        guard model.state.isLoaded.isFalse else { return }
         
         disposeBag = DisposeBag()
         model.reset()
